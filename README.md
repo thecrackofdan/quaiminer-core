@@ -1,10 +1,10 @@
-# AMD RX 590 OpenCL Setup for Ubuntu 20.04
+# Quai AMD Setup - RX 590 OpenCL for Ubuntu 20.04
 
 This repository contains scripts and documentation for setting up OpenCL support on Ubuntu 20.04 with an AMD RX 590 GPU, optimized for cryptocurrency mining (specifically Quai mining).
 
 ## 🔗 Repository
 
-**GitHub:** https://github.com/thecrackofdan/amd-rx590-opencl-setup
+**GitHub:** https://github.com/thecrackofdan/quai-amd-setup
 
 ## 📋 Contents
 
