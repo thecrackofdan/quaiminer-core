@@ -1,4 +1,4 @@
-// Quai Network Mining Dashboard Configuration
+// QuaiMiner CORE Dashboard Configuration
 // Declare CONFIG at global scope first
 var CONFIG;
 

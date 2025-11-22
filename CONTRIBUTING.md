@@ -1,6 +1,6 @@
 # Contributing to QuaiMiner Core
 
-Thank you for your interest in contributing to QuaiMiner Core! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to QuaiMiner CORE! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -124,5 +124,5 @@ Before submitting a PR:
 - Check existing documentation
 - Review closed issues/PRs for similar work
 
-Thank you for contributing to QuaiMiner Core! 🚀
+Thank you for contributing to QuaiMiner CORE! 🚀
 

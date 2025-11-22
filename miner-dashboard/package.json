@@ -1,7 +1,7 @@
 {
   "name": "quaiminer-core-dashboard",
   "version": "1.0.0",
-  "description": "QuaiMiner Core - Production-ready real-time dashboard for monitoring Quai Network mining operations",
+  "description": "QuaiMiner CORE - Production-ready real-time dashboard for monitoring Quai Network mining operations",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

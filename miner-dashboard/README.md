@@ -1,8 +1,8 @@
-# QuaiMiner Core - Mining Dashboard
+# QuaiMiner CORE - Mining Dashboard
 
-**Part of QuaiMiner Core - Production-ready real-time dashboard for monitoring Quai Network mining operations**
+**Part of QuaiMiner CORE - Production-ready real-time dashboard for monitoring Quai Network mining operations**
 
-🌐 **QuaiMiner Core:** [Main Repository](https://github.com/thecrackofdan/quaiminer-core) - Complete mining toolkit | 📊 **Dashboard:** [Launch Dashboard](public/index.html)
+🌐 **QuaiMiner CORE:** [Main Repository](https://github.com/thecrackofdan/quaiminer-core) - Complete mining toolkit | 📊 **Dashboard:** [Launch Dashboard](public/index.html)
 
 ## Features
 
@@ -165,7 +165,7 @@ MIT
 
 ## Related Projects
 
-- [QuaiMiner Core](https://github.com/thecrackofdan/quaiminer-core) - Complete mining toolkit with setup scripts, research, and AMD GPU configuration tools
+- [QuaiMiner CORE](https://github.com/thecrackofdan/quaiminer-core) - Complete mining toolkit with setup scripts, research, and AMD GPU configuration tools
 
 ## Support
 

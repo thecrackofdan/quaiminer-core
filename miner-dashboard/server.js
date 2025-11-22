@@ -30,7 +30,7 @@ const NODE_ENV = process.env.NODE_ENV || 'production';
 // Log startup info
 if (NODE_ENV === 'development') {
     console.log('========================================');
-    console.log('  Quai Mining Dashboard Server');
+    console.log('  QuaiMiner CORE Dashboard Server');
     console.log('========================================');
 }
 console.log(`Server starting on port ${PORT}`);
@@ -259,7 +259,7 @@ app.get('*', (req, res) => {
 // Start server
 app.listen(PORT, () => {
     if (NODE_ENV === 'development') {
-        console.log(`🚀 QuaiMiner Core Dashboard running on http://localhost:${PORT}`);
+        console.log(`🚀 QuaiMiner CORE Dashboard running on http://localhost:${PORT}`);
         console.log(`📊 Open your browser and navigate to the URL above`);
         console.log(`🔗 Node RPC: ${NODE_RPC_URL}`);
     } else {

@@ -164,7 +164,7 @@ class MiningDashboard {
             throw error;
         }
         this.updateStatus('active');
-        this.addLog('Quai Network Mining Dashboard initialized', 'info');
+        this.addLog('QuaiMiner CORE Dashboard initialized', 'info');
         const miningMode = (CONFIG.mining && CONFIG.mining.mode) ? CONFIG.mining.mode : 'solo';
         this.addLog(`Mining mode: ${miningMode}`, 'info');
         if (CONFIG.mining && CONFIG.mining.mergedMining && CONFIG.mining.mergedMining.enabled) {
