@@ -264,6 +264,12 @@ class MiningDashboard {
             
             // Initialize tooltips
             this.initTooltips();
+            
+            // Initialize validated blocks tracking
+            this.initValidatedBlocks();
+            
+            // Initialize miner configuration and remote management
+            this.initMinerManagement();
     }
     
     /**
@@ -291,13 +297,6 @@ class MiningDashboard {
         if (closeSettingsBtn && settingsModal) {
             closeSettingsBtn.onclick = () => {
                 settingsModal.style.display = 'none';
-            };
-            
-            // Close on outside click
-            window.onclick = (event) => {
-                if (event.target === settingsModal) {
-                    settingsModal.style.display = 'none';
-                }
             };
         }
         
@@ -3600,6 +3599,394 @@ class MiningDashboard {
                 this.prometheusErrorLogged = true;
             }
         }
+    }
+    
+    /**
+     * Initialize validated blocks tracking
+     */
+    initValidatedBlocks() {
+        // Fetch validated blocks on load
+        this.fetchValidatedBlocks();
+        this.fetchBlockStats();
+        
+        // Update every 30 seconds (only if dashboard is visible)
+        this.validatedBlocksInterval = setInterval(() => {
+            if (!document.hidden) {
+                this.fetchValidatedBlocks();
+                this.fetchBlockStats();
+            }
+        }, 30000);
+    }
+    
+    /**
+     * Fetch validated blocks from API
+     */
+    async fetchValidatedBlocks() {
+        try {
+            const response = await fetch('/api/blocks/validated?limit=50');
+            if (!response.ok) throw new Error('Failed to fetch validated blocks');
+            
+            const data = await response.json();
+            this.updateValidatedBlocksUI(data.blocks);
+        } catch (error) {
+            console.error('Error fetching validated blocks:', error);
+        }
+    }
+    
+    /**
+     * Fetch block statistics
+     */
+    async fetchBlockStats() {
+        try {
+            const response = await fetch('/api/blocks/stats');
+            if (!response.ok) throw new Error('Failed to fetch block stats');
+            
+            const data = await response.json();
+            this.updateBlockStatsUI(data);
+        } catch (error) {
+            console.error('Error fetching block stats:', error);
+        }
+    }
+    
+    /**
+     * Update validated blocks UI
+     */
+    updateValidatedBlocksUI(blocks) {
+        const container = document.getElementById('validatedBlocksList');
+        if (!container) return;
+        
+        if (!blocks || blocks.length === 0) {
+            container.innerHTML = '<div class="blocks-placeholder">No validated blocks yet. Start mining to see your blocks here!</div>';
+            return;
+        }
+        
+        container.innerHTML = blocks.map(block => `
+            <div class="block-item">
+                <div class="block-item-info">
+                    <div class="block-item-number">Block #${block.blockNumber.toLocaleString()}</div>
+                    <div class="block-item-details">
+                        ${block.chain} • ${new Date(block.timestamp).toLocaleString()}
+                        ${block.blockHash ? ` • ${block.blockHash.substring(0, 16)}...` : ''}
+                    </div>
+                </div>
+                <div class="block-item-reward">
+                    <div class="block-item-reward-value">${(block.reward || 0).toFixed(6)}</div>
+                    <div class="block-item-reward-label">QUAI</div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    /**
+     * Update block statistics UI
+     */
+    updateBlockStatsUI(stats) {
+        const totalEl = document.getElementById('totalValidatedBlocks');
+        const last24hEl = document.getElementById('blocksLast24h');
+        const last7dEl = document.getElementById('blocksLast7d');
+        const totalRewardEl = document.getElementById('totalBlockReward');
+        
+        if (totalEl) totalEl.textContent = stats.total || 0;
+        if (last24hEl) last24hEl.textContent = stats.last24h || 0;
+        if (last7dEl) last7dEl.textContent = stats.last7d || 0;
+        if (totalRewardEl) totalRewardEl.textContent = (stats.totalReward || 0).toFixed(6);
+    }
+    
+    /**
+     * Initialize miner management (configuration and remote control)
+     */
+    initMinerManagement() {
+        // Check if QuaiMiner OS is available
+        this.checkMinerAvailability();
+        
+        // Miner configuration modal
+        const openConfigBtn = document.getElementById('openConfigBtn');
+        const minerConfigModal = document.getElementById('minerConfigModal');
+        const closeMinerConfigBtn = document.getElementById('closeMinerConfigBtn');
+        const saveMinerConfigBtn = document.getElementById('saveMinerConfigBtn');
+        const testMinerConfigBtn = document.getElementById('testMinerConfigBtn');
+        
+        if (openConfigBtn && minerConfigModal) {
+            openConfigBtn.onclick = () => {
+                minerConfigModal.style.display = 'block';
+                this.loadMinerConfig();
+            };
+        }
+        
+        if (closeMinerConfigBtn && minerConfigModal) {
+            closeMinerConfigBtn.onclick = () => {
+                minerConfigModal.style.display = 'none';
+            };
+        }
+        
+        // Handle modal close on outside click (for both modals)
+        window.addEventListener('click', (event) => {
+            const settingsModal = document.getElementById('settingsModal');
+            const minerConfigModal = document.getElementById('minerConfigModal');
+            if (event.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+            if (event.target === minerConfigModal) {
+                minerConfigModal.style.display = 'none';
+            }
+        });
+        
+        if (saveMinerConfigBtn) {
+            saveMinerConfigBtn.onclick = () => this.saveMinerConfig();
+        }
+        
+        if (testMinerConfigBtn) {
+            testMinerConfigBtn.onclick = () => this.testMinerConfig();
+        }
+        
+        // Remote control buttons
+        const startMinerBtn = document.getElementById('startMinerBtn');
+        const stopMinerBtn = document.getElementById('stopMinerBtn');
+        const restartMinerBtn = document.getElementById('restartMinerBtn');
+        const viewLogsBtn = document.getElementById('viewLogsBtn');
+        
+        if (startMinerBtn) startMinerBtn.onclick = () => this.controlMiner('start');
+        if (stopMinerBtn) stopMinerBtn.onclick = () => this.controlMiner('stop');
+        if (restartMinerBtn) restartMinerBtn.onclick = () => this.controlMiner('restart');
+        if (viewLogsBtn) viewLogsBtn.onclick = () => this.viewMinerLogs();
+        
+        // Update miner status every 10 seconds (only if section is visible)
+        this.minerStatusInterval = setInterval(() => {
+            const section = document.getElementById('remoteManagementSection');
+            if (section && section.style.display !== 'none' && !document.hidden) {
+                this.updateMinerStatus();
+            }
+        }, 10000);
+        this.updateMinerStatus();
+    }
+    
+    /**
+     * Check if QuaiMiner OS API is available
+     */
+    async checkMinerAvailability() {
+        try {
+            const response = await fetch('/api/miner/status');
+            if (response.ok) {
+                const section = document.getElementById('remoteManagementSection');
+                if (section) section.style.display = 'block';
+            }
+        } catch (error) {
+            // Miner API not available, hide remote management section
+            const section = document.getElementById('remoteManagementSection');
+            if (section) section.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Update miner status
+     */
+    async updateMinerStatus() {
+        try {
+            const response = await fetch('/api/miner/status');
+            if (!response.ok) return;
+            
+            const status = await response.json();
+            const statusDot = document.getElementById('minerStatusDot');
+            const statusText = document.getElementById('minerStatusText');
+            
+            if (statusDot && statusText) {
+                if (status.status === 'running') {
+                    statusDot.className = 'status-dot-large running';
+                    statusText.textContent = 'Running';
+                } else {
+                    statusDot.className = 'status-dot-large stopped';
+                    statusText.textContent = status.status || 'Stopped';
+                }
+            }
+        } catch (error) {
+            console.error('Error updating miner status:', error);
+        }
+    }
+    
+    /**
+     * Load miner configuration
+     */
+    async loadMinerConfig() {
+        try {
+            const response = await fetch('/api/miner/config');
+            if (!response.ok) throw new Error('Failed to load config');
+            
+            const result = await response.json();
+            if (!result.success || !result.config) return;
+            
+            const config = result.config;
+            const stratumInput = document.getElementById('stratumAddress');
+            const nodeRpcInput = document.getElementById('nodeRpcUrl');
+            const walletInput = document.getElementById('walletAddress');
+            const workerInput = document.getElementById('workerName');
+            const autoStartInput = document.getElementById('autoStartMiner');
+            
+            if (stratumInput) stratumInput.value = config.miner?.stratum || '';
+            if (nodeRpcInput) nodeRpcInput.value = config.node?.rpcUrl || '';
+            if (walletInput) walletInput.value = config.miner?.wallet || '';
+            if (workerInput) workerInput.value = config.miner?.worker || '';
+            if (autoStartInput) autoStartInput.checked = config.autoStart !== false;
+        } catch (error) {
+            console.error('Error loading miner config:', error);
+            this.showConfigError('Failed to load configuration: ' + error.message);
+        }
+    }
+    
+    /**
+     * Save miner configuration
+     */
+    async saveMinerConfig() {
+        const stratumInput = document.getElementById('stratumAddress');
+        const nodeRpcInput = document.getElementById('nodeRpcUrl');
+        const walletInput = document.getElementById('walletAddress');
+        const workerInput = document.getElementById('workerName');
+        const autoStartInput = document.getElementById('autoStartMiner');
+        
+        const updates = {
+            stratum: stratumInput?.value || '',
+            nodeRpcUrl: nodeRpcInput?.value || '',
+            wallet: walletInput?.value || '',
+            worker: workerInput?.value || '',
+            autoStart: autoStartInput?.checked || false
+        };
+        
+        try {
+            const response = await fetch('/api/miner/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+            
+            if (!response.ok) throw new Error('Failed to save configuration');
+            
+            const result = await response.json();
+            if (result.success) {
+                this.showConfigSuccess('Configuration saved successfully!');
+                this.updateMinerStatus();
+            } else {
+                this.showConfigError(result.error || 'Failed to save configuration');
+            }
+        } catch (error) {
+            console.error('Error saving miner config:', error);
+            this.showConfigError('Failed to save configuration: ' + error.message);
+        }
+    }
+    
+    /**
+     * Test miner configuration
+     */
+    async testMinerConfig() {
+        const nodeRpcInput = document.getElementById('nodeRpcUrl');
+        const rpcUrl = nodeRpcInput?.value || '';
+        
+        if (!rpcUrl) {
+            this.showConfigError('Please enter a Node RPC URL');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/node/rpc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    method: 'eth_blockNumber',
+                    params: []
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.result) {
+                    const blockNum = parseInt(data.result, 16);
+                    this.showConfigSuccess(`Connection successful! Current block: ${blockNum.toLocaleString()}`);
+                } else {
+                    this.showConfigError('Invalid response from node');
+                }
+            } else {
+                this.showConfigError('Failed to connect to node');
+            }
+        } catch (error) {
+            console.error('Error testing config:', error);
+            this.showConfigError('Connection test failed: ' + error.message);
+        }
+    }
+    
+    /**
+     * Control miner (start/stop/restart)
+     */
+    async controlMiner(action) {
+        try {
+            const response = await fetch(`/api/miner/${action}`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) throw new Error(`Failed to ${action} miner`);
+            
+            const result = await response.json();
+            if (result.success) {
+                this.addLog(`Miner ${action}ed successfully`, 'success');
+                setTimeout(() => this.updateMinerStatus(), 2000);
+            } else {
+                this.addLog(`Failed to ${action} miner: ${result.error}`, 'error');
+            }
+        } catch (error) {
+            console.error(`Error ${action}ing miner:`, error);
+            this.addLog(`Error ${action}ing miner: ${error.message}`, 'error');
+        }
+    }
+    
+    /**
+     * View miner logs
+     */
+    async viewMinerLogs() {
+        const logsCard = document.getElementById('minerLogsCard');
+        const logsContainer = document.getElementById('minerLogsContainer');
+        
+        if (!logsCard || !logsContainer) return;
+        
+        try {
+            const response = await fetch('/api/miner/logs?lines=100');
+            if (!response.ok) throw new Error('Failed to fetch logs');
+            
+            const result = await response.json();
+            if (result.success) {
+                logsContainer.textContent = result.logs || 'No logs available';
+                logsCard.style.display = 'block';
+            } else {
+                logsContainer.textContent = 'Error: ' + (result.error || 'Failed to load logs');
+                logsCard.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error fetching miner logs:', error);
+            logsContainer.textContent = 'Error: ' + error.message;
+            logsCard.style.display = 'block';
+        }
+    }
+    
+    /**
+     * Show configuration error message
+     */
+    showConfigError(message) {
+        const errorEl = document.getElementById('minerConfigError');
+        const successEl = document.getElementById('minerConfigSuccess');
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+        if (successEl) successEl.style.display = 'none';
+    }
+    
+    /**
+     * Show configuration success message
+     */
+    showConfigSuccess(message) {
+        const errorEl = document.getElementById('minerConfigError');
+        const successEl = document.getElementById('minerConfigSuccess');
+        if (successEl) {
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+        }
+        if (errorEl) errorEl.style.display = 'none';
     }
 }
 

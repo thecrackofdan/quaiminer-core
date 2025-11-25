@@ -473,6 +473,135 @@
         </div>
     </div>
 
+    <!-- Miner Configuration Modal -->
+    <div id="minerConfigModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Miner Configuration</h2>
+                <button class="modal-close" id="closeMinerConfigBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="minerConfigError" class="error-message" style="display: none; margin-bottom: 1rem;"></div>
+                <div id="minerConfigSuccess" class="success-message" style="display: none; margin-bottom: 1rem;"></div>
+                
+                <div class="setting-item">
+                    <label>
+                        Stratum Proxy Address:
+                        <input type="text" id="stratumAddress" placeholder="stratum://localhost:3333" 
+                               style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-card); color: var(--text-primary);" />
+                    </label>
+                    <p class="setting-hint">Your Quai node's stratum proxy address (for solo mining)</p>
+                </div>
+                
+                <div class="setting-item">
+                    <label>
+                        Node RPC URL:
+                        <input type="text" id="nodeRpcUrl" placeholder="http://localhost:8545" 
+                               style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-card); color: var(--text-primary);" />
+                    </label>
+                    <p class="setting-hint">Your Quai node's RPC endpoint</p>
+                </div>
+                
+                <div class="setting-item">
+                    <label>
+                        Wallet Address (optional):
+                        <input type="text" id="walletAddress" placeholder="0x..." 
+                               style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-card); color: var(--text-primary);" />
+                    </label>
+                    <p class="setting-hint">Wallet address for coinbase rewards (usually managed by node)</p>
+                </div>
+                
+                <div class="setting-item">
+                    <label>
+                        Worker Name (optional):
+                        <input type="text" id="workerName" placeholder="worker1" 
+                               style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--bg-card); color: var(--text-primary);" />
+                    </label>
+                    <p class="setting-hint">Optional worker identifier</p>
+                </div>
+                
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="autoStartMiner" />
+                        Auto-start miner on boot
+                    </label>
+                </div>
+                
+                <div class="setting-item" style="margin-top: 1.5rem;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" id="saveMinerConfigBtn" style="flex: 1;">Save Configuration</button>
+                        <button class="btn-secondary" id="testMinerConfigBtn" style="flex: 1;">Test Connection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remote Management Section -->
+    <section class="remote-management-section" id="remoteManagementSection" style="display: none;">
+        <h2 class="section-title-red">
+            🔧 Remote Miner Management
+            <span class="info-icon" data-tooltip="Control your QuaiMiner OS miner remotely. Start, stop, restart, and view logs.">ℹ️</span>
+        </h2>
+        
+        <div class="miner-control-panel">
+            <div class="miner-status-card">
+                <h3>Miner Status</h3>
+                <div class="miner-status-indicator">
+                    <span class="status-dot-large" id="minerStatusDot"></span>
+                    <span id="minerStatusText">Checking...</span>
+                </div>
+                <div class="miner-control-buttons">
+                    <button class="btn-success" id="startMinerBtn">▶ Start</button>
+                    <button class="btn-danger" id="stopMinerBtn">⏹ Stop</button>
+                    <button class="btn-warning" id="restartMinerBtn">🔄 Restart</button>
+                    <button class="btn-secondary" id="viewLogsBtn">📋 View Logs</button>
+                    <button class="btn-secondary" id="openConfigBtn">⚙️ Configure</button>
+                </div>
+            </div>
+            
+            <div class="miner-logs-card" id="minerLogsCard" style="display: none;">
+                <h3>Miner Logs</h3>
+                <div class="logs-container" id="minerLogsContainer" style="max-height: 300px; overflow-y: auto; background: var(--bg-card); padding: 1rem; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Validated Blocks Section -->
+    <section class="validated-blocks-section">
+        <h2 class="section-title-red">
+            ✅ Validated Blocks
+            <span class="info-icon" data-tooltip="Blocks that your miner has successfully validated. These are blocks you've mined and contributed to the network.">ℹ️</span>
+        </h2>
+        
+        <div class="blocks-stats-grid">
+            <div class="block-stat-card">
+                <h3>Total Blocks</h3>
+                <p class="block-stat-value" id="totalValidatedBlocks">0</p>
+            </div>
+            <div class="block-stat-card">
+                <h3>Last 24 Hours</h3>
+                <p class="block-stat-value" id="blocksLast24h">0</p>
+            </div>
+            <div class="block-stat-card">
+                <h3>Last 7 Days</h3>
+                <p class="block-stat-value" id="blocksLast7d">0</p>
+            </div>
+            <div class="block-stat-card">
+                <h3>Total Reward</h3>
+                <p class="block-stat-value" id="totalBlockReward">0.000000</p>
+                <p class="block-stat-unit">QUAI</p>
+            </div>
+        </div>
+        
+        <div class="blocks-list-container">
+            <h3 style="margin-bottom: 1rem;">Recent Validated Blocks</h3>
+            <div id="validatedBlocksList" class="blocks-list">
+                <div class="blocks-placeholder">No validated blocks yet. Start mining to see your blocks here!</div>
+            </div>
+        </div>
+    </section>
+
     <!-- Inline debug script -->
     <script src="js/utils.js"></script>
     <script src="js/config.js"></script>

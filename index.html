@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="QuaiMiner CORE - Complete toolkit for solo mining Quai Network with AMD GPUs and your own node. Dashboard, setup scripts, and mining software research.">
-    <title>QuaiMiner CORE - Solo Mining with Your Own Node</title>
-    <!-- Quai Network Typography - Inter Font Family -->
+    <meta name="description" content="QuaiMiner OS - Automated solo mining management for Quai Network. Like Hive OS, but built specifically for Quai. Download and start mining in minutes.">
+    <title>QuaiMiner OS - Automated Solo Mining for Quai Network</title>
+    <!-- Quai Network Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,41 +17,31 @@
         }
 
         :root {
-            /* Quai Network Brand Colors - Red & Black */
-            --primary: #FF0000;           /* Quai Red */
-            --primary-dark: #CC0000;      /* Deep Red */
-            --secondary: #FF3333;         /* Bright Red */
-            --accent: #FF1A1A;           /* Accent Red */
-            --dark: #0A0A0A;             /* Near Black */
-            --dark-light: #1A0000;       /* Dark with red tint */
-            --light: #F8F8F8;            /* Light background */
-            --text: #FFFFFF;             /* White text for dark sections */
-            --text-dark: #1e293b;        /* Dark text for light sections */
-            --text-light: #CCCCCC;       /* Light gray text */
-            --success: #00FF00;          /* Green for success */
-            --warning: #FFAA00;          /* Orange warning */
+            /* Quai Network Brand Colors - Official Palette */
+            --quai-red: #FF0000;
+            --quai-red-dark: #CC0000;
+            --quai-red-bright: #FF3333;
+            --quai-red-light: rgba(255, 0, 0, 0.1);
+            --quai-black: #000000;
+            --quai-black-light: #0A0A0A;
+            --quai-black-lighter: #1A1A1A;
+            --quai-white: #FFFFFF;
+            --quai-gray: #CCCCCC;
+            --quai-gray-dark: #666666;
+            --quai-gray-light: #E5E5E5;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: var(--text);
-            background: linear-gradient(135deg, #000000 0%, #0A0000 50%, #1A0000 100%);
+            color: var(--quai-white);
+            background: var(--quai-black);
             min-height: 100vh;
         }
-        
-        /* Global Typography - Quai Network Fonts */
+
         h1, h2, h3, h4, h5, h6 {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-weight: 700;
-        }
-        
-        button, .btn {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
-        code, pre, .code {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
         }
 
         .container {
@@ -59,24 +49,15 @@
             margin: 0 auto;
             padding: 0 20px;
         }
-        
-        /* Text colors for different sections */
-        .hero, .footer {
-            color: #FFFFFF;
-        }
-        
-        .features, .tools {
-            color: var(--text-dark);
-        }
 
+        /* Header */
         header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: var(--quai-black);
+            border-bottom: 2px solid var(--quai-red);
+            padding: 1.5rem 0;
             position: sticky;
             top: 0;
             z-index: 1000;
-            padding: 1rem 0;
         }
 
         nav {
@@ -86,13 +67,34 @@
         }
 
         .logo {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-weight: 800;
+            color: var(--quai-red);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--quai-red);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--quai-black);
+            flex-shrink: 0;
+        }
+
+        /* Logo placeholder - replace with official Quai Network logo when available */
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            display: none; /* Hide until logo is added */
         }
 
         .nav-links {
@@ -102,165 +104,359 @@
         }
 
         .nav-links a {
+            color: var(--quai-white);
             text-decoration: none;
-            color: var(--text);
             font-weight: 500;
             transition: color 0.3s;
         }
 
         .nav-links a:hover {
-            color: var(--primary);
+            color: var(--quai-red);
         }
 
+        /* Hero Section */
         .hero {
             text-align: center;
-            padding: 4rem 0;
-            color: white;
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--quai-black) 0%, var(--quai-black-light) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
 
         .hero h1 {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 3.5rem;
-            font-weight: 800;
+            font-size: 4.5rem;
+            font-weight: 900;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, var(--quai-red) 0%, var(--quai-red-bright) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
         }
 
-        .hero p {
+        .hero .tagline {
+            font-size: 1.75rem;
+            color: var(--quai-white);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .hero .subtitle {
             font-size: 1.25rem;
-            margin-bottom: 2rem;
-            opacity: 0.95;
+            color: var(--quai-gray);
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+
+        .cta-primary {
+            display: inline-block;
+            background: var(--quai-red);
+            color: var(--quai-white);
+            padding: 1rem 3rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.25rem;
+            transition: all 0.3s;
+            border: 2px solid var(--quai-red);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+
+        .cta-primary:hover {
+            background: var(--quai-red-dark);
+            border-color: var(--quai-red-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+        }
+
+        .cta-secondary {
+            display: inline-block;
+            background: transparent;
+            color: var(--quai-white);
+            padding: 1rem 3rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            border: 2px solid var(--quai-white);
+            margin-left: 1rem;
+        }
+
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--quai-red);
+            color: var(--quai-red);
         }
 
         .cta-buttons {
+            margin-top: 2rem;
             display: flex;
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
         }
 
-        .btn {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
+        /* Benefits Section */
+        .benefits {
+            padding: 5rem 0;
+            background: var(--quai-black-light);
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: 2px solid var(--primary);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            border-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255, 0, 0, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid white;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .features {
-            background: #FFFFFF;
-            padding: 4rem 0;
-        }
-
-        .features-grid {
+        .benefits-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2rem;
             margin-top: 3rem;
         }
 
-        .feature-card {
-            background: var(--light);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+        .benefit-card {
+            background: var(--quai-black);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 2.5rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
-        .feature-card:hover {
+        .benefit-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--quai-red) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .benefit-card:hover::before {
+            opacity: 1;
+        }
+
+        .benefit-card:hover {
+            border-color: var(--quai-red);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
 
-        .feature-icon {
+        .benefit-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
         }
 
-        .feature-card h3 {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
+        .benefit-card h3 {
+            color: var(--quai-red);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card p {
+            color: var(--quai-gray);
+            line-height: 1.8;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 5rem 0;
+            background: var(--quai-black);
         }
 
         .section-title {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             text-align: center;
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 800;
+            color: var(--quai-red);
             margin-bottom: 1rem;
-            color: var(--primary);
         }
 
         .section-subtitle {
             text-align: center;
-            color: var(--text-light);
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
+            color: var(--quai-gray);
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
         }
 
-        .tools {
-            background: var(--light);
-            padding: 4rem 0;
-        }
-
-        .tools-grid {
+        .steps {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background: var(--quai-red);
+            color: var(--quai-white);
+            border-radius: 50%;
+            line-height: 60px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .step h3 {
+            color: var(--quai-white);
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .step p {
+            color: var(--quai-gray);
+        }
+
+        /* Download Section */
+        .download {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--quai-black-light) 0%, var(--quai-black) 100%);
+            text-align: center;
+        }
+
+        .download-box {
+            background: var(--quai-black);
+            border: 2px solid var(--quai-red);
+            border-radius: 20px;
+            padding: 3.5rem;
+            max-width: 750px;
+            margin: 0 auto;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .download-box::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--quai-red), var(--quai-red-bright), var(--quai-red));
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(10px);
+        }
+
+        .download-box h2 {
+            color: var(--quai-red);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .download-box p {
+            color: var(--quai-gray);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .download-instructions {
+            background: var(--quai-black-light);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .download-instructions code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--quai-black);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            color: var(--quai-red);
+            font-size: 0.9rem;
+        }
+
+        .download-instructions pre {
+            background: var(--quai-black);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .download-instructions pre code {
+            color: var(--quai-gray);
+            background: transparent;
+            padding: 0;
+        }
+
+        /* Features Highlight */
+        .features-highlight {
+            padding: 5rem 0;
+            background: var(--quai-black);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
 
-        .tool-card {
-            background: white;
+        .feature-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
             padding: 1.5rem;
+            background: var(--quai-black-light);
             border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--quai-red);
         }
 
-        .tool-card h4 {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-weight: 700;
-            color: var(--primary);
+        .feature-item-icon {
+            font-size: 1.5rem;
+            color: var(--quai-red);
+            flex-shrink: 0;
+        }
+
+        .feature-item-content h4 {
+            color: var(--quai-white);
             margin-bottom: 0.5rem;
         }
 
-        .footer {
-            background: #000000;
-            color: white;
+        .feature-item-content p {
+            color: var(--quai-gray);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--quai-black);
+            border-top: 2px solid var(--quai-red);
             padding: 3rem 0;
             text-align: center;
-            border-top: 3px solid var(--primary);
         }
 
         .footer-links {
@@ -272,40 +468,89 @@
         }
 
         .footer-links a {
-            color: white;
+            color: var(--quai-gray);
             text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.3s;
+            transition: color 0.3s;
         }
 
         .footer-links a:hover {
-            opacity: 1;
+            color: var(--quai-red);
         }
 
+        /* Badge/Highlight */
         .badge {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: var(--success);
-            color: white;
+            background: rgba(255, 0, 0, 0.15);
+            border: 1px solid var(--quai-red);
+            color: var(--quai-red);
+            padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.875rem;
             font-weight: 600;
-            margin-left: 0.5rem;
+            margin-bottom: 1rem;
         }
 
+        /* Stats Section */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--quai-red);
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            color: var(--quai-gray);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
             }
 
-            .nav-links {
-                flex-direction: column;
-                gap: 1rem;
+            .hero .tagline {
+                font-size: 1.25rem;
             }
 
-            .features-grid,
-            .tools-grid {
-                grid-template-columns: 1fr;
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .cta-secondary {
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .stats {
+                gap: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
             }
         }
     </style>
@@ -313,11 +558,15 @@
 <body>
     <header>
         <nav class="container">
-            <div class="logo">⚡ QuaiMiner CORE</div>
+            <a href="#" class="logo">
+                <div class="logo-icon">Q</div>
+                <img src="assets/quai-logo.svg" alt="Quai Network" class="logo-img" />
+                <span>QuaiMiner OS</span>
+            </a>
             <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#tools">Tools</a></li>
-                <li><a href="#dashboard">Dashboard</a></li>
+                <li><a href="#benefits">Why QuaiMiner OS</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#download">Download</a></li>
                 <li><a href="https://github.com/thecrackofdan/quaiminer-core" target="_blank">GitHub</a></li>
             </ul>
         </nav>
@@ -325,119 +574,195 @@
 
     <section class="hero">
         <div class="container">
-            <h1>QuaiMiner CORE</h1>
-            <p>Solo mining toolkit for Quai Network with AMD GPUs and your own node</p>
-            <div class="cta-buttons">
-                <a href="#dashboard" class="btn btn-primary">Launch Dashboard</a>
-                <a href="https://github.com/thecrackofdan/quaiminer-core" class="btn btn-secondary" target="_blank">View on GitHub</a>
-            </div>
-        </div>
-    </section>
-
-    <section class="features" id="features">
-        <div class="container">
-            <h2 class="section-title">Everything You Need for Solo Mining</h2>
-            <p class="section-subtitle">Professional tools and resources for solo mining Quai Network with your own node</p>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Real-Time Dashboard</h3>
-                    <p>Monitor your mining operations with a beautiful, responsive dashboard. Track hash rates, temperatures, shares, and earnings in real-time.</p>
+            <div class="hero-content">
+                <span class="badge">🚀 Open Source • Built for Solo Miners</span>
+                <h1>QuaiMiner OS</h1>
+                <p class="tagline">Automated Solo Mining for Quai Network</p>
+                <p class="subtitle">The easiest way to solo mine Quai. Install GPU drivers, point at your node's stratum proxy, and start mining. Everything else—miner installation, configuration, auto-start, and monitoring—is automated.</p>
+                <div class="cta-buttons">
+                    <a href="#download" class="cta-primary">Download QuaiMiner OS</a>
+                    <a href="https://github.com/thecrackofdan/quaiminer-core" class="cta-secondary" target="_blank">View on GitHub</a>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚙️</div>
-                    <h3>Automated Setup</h3>
-                    <p>One-click AMD GPU setup scripts for Ubuntu. Get your RX 590 or other AMD cards mining Quai in minutes, not hours.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔬</div>
-                    <h3>Mining Research</h3>
-                    <p>Comprehensive analysis of all Quai mining software. Compare fees, performance, and features to choose the best miner for you.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛠️</div>
-                    <h3>Diagnostic Tools</h3>
-                    <p>Built-in diagnostic scripts to troubleshoot OpenCL issues, verify GPU detection, and optimize your mining setup.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📈</div>
-                    <h3>Performance Tracking</h3>
-                    <p>Track individual GPU metrics, monitor temperatures, and optimize your mining efficiency with detailed analytics.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Solo Mining with Your Own Node</h3>
-                    <p>Designed specifically for solo mining with your own Quai node. Full support for quai-gpu-miner. Keep 100% of your rewards with zero pool fees.</p>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Simple Steps</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">&lt;5</span>
+                        <span class="stat-label">Minutes Setup</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Solo Mining</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="tools" id="tools">
+    <section class="benefits" id="benefits">
         <div class="container">
-            <h2 class="section-title">Included Tools</h2>
-            <p class="section-subtitle">Everything you need in one package</p>
-            <div class="tools-grid">
-                <div class="tool-card">
-                    <h4>📊 Mining Dashboard</h4>
-                    <p>Real-time monitoring dashboard with Node.js backend included in this repository</p>
+            <h2 class="section-title">Why QuaiMiner OS?</h2>
+            <p class="section-subtitle">Designed for solo miners running their own Quai node</p>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Incredibly Easy</h3>
+                    <p>Just install GPU drivers, configure your node's stratum proxy, and start mining. Everything else is automated—miner installation, configuration, auto-start, and monitoring.</p>
                 </div>
-                <div class="tool-card">
-                    <h4>🚀 Quick AMD Setup</h4>
-                    <p>Automated installation script for AMDGPU Pro drivers</p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🎯</div>
+                    <h3>Solo Mining Focus</h3>
+                    <p>Built specifically for solo mining with your own Quai node. Connect to your node's stratum proxy and keep 100% of your rewards—no pool fees.</p>
                 </div>
-                <div class="tool-card">
-                    <h4>🔍 OpenCL Diagnostics</h4>
-                    <p>Diagnostic tool to check system status and OpenCL support</p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🚀</div>
+                    <h3>Auto-Start on Boot</h3>
+                    <p>Mining starts automatically when your system boots. No manual intervention needed. Perfect for dedicated mining rigs.</p>
                 </div>
-                <div class="tool-card">
-                    <h4>📋 Miner Comparison</h4>
-                    <p>Interactive tool to get personalized miner recommendations</p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📊</div>
+                    <h3>Web Dashboard</h3>
+                    <p>Monitor and control your miners from anywhere with the built-in web dashboard. Real-time stats, remote control, and configuration management.</p>
                 </div>
-                <div class="tool-card">
-                    <h4>📚 Complete Documentation</h4>
-                    <p>Step-by-step guides for setup, troubleshooting, and optimization</p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔧</div>
+                    <h3>AMD RX 590 Optimized</h3>
+                    <p>Specialized support for AMD RX 590 with automatic driver installation, optimization profiles, and performance tuning tools.</p>
                 </div>
-                <div class="tool-card">
-                    <h4>🔧 Configuration Tools</h4>
-                    <p>Scripts and configs for Quai GPU Miner and mining setup</p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔮</div>
+                    <h3>Future Depool Ready</h3>
+                    <p>Configuration ready for future depool functionality. When depools launch, you'll be ready to use them with a simple configuration change.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="features" id="dashboard" style="background: var(--light);">
+    <section class="how-it-works" id="how-it-works">
         <div class="container">
-            <h2 class="section-title">Launch Dashboard</h2>
-            <p class="section-subtitle">Start monitoring your mining operations</p>
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="miner-dashboard/public/index.html" class="btn btn-primary" style="font-size: 1.25rem; padding: 1rem 3rem;">
-                    Open Mining Dashboard →
-                </a>
-                <p style="margin-top: 1rem; color: var(--text-light);">
-                    The dashboard is included in this repository in the <code>miner-dashboard/</code> directory
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Get started in 3 simple steps</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Install Drivers</h3>
+                    <p>Install AMD or NVIDIA GPU drivers (one-time setup). For AMD RX 590, we'll help you with automated setup.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Install QuaiMiner OS</h3>
+                    <p>Run the installer. It automatically installs quai-gpu-miner, sets up the service, and configures everything.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Configure & Start</h3>
+                    <p>Point it at your node's stratum proxy address. Mining starts automatically and runs on boot.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="download" id="download">
+        <div class="container">
+            <div class="download-box">
+                <h2>Download QuaiMiner OS</h2>
+                <p>Get started with automated solo mining management for Quai Network</p>
+                
+                <div class="download-instructions">
+                    <h3 style="color: var(--quai-red); margin-bottom: 1rem;">Quick Install</h3>
+                    <p style="margin-bottom: 1rem; color: var(--quai-gray);">Clone the repository and run the installer:</p>
+                    <pre><code>git clone https://github.com/thecrackofdan/quaiminer-core.git
+cd quaiminer-core/quaiminer-os
+sudo ./install.sh</code></pre>
+                </div>
+
+                <div class="download-instructions">
+                    <h3 style="color: var(--quai-red); margin-bottom: 1rem;">Configure Your Node</h3>
+                    <p style="margin-bottom: 1rem; color: var(--quai-gray);">After installation, configure your node's stratum proxy:</p>
+                    <pre><code>sudo quaiminer-config set-stratum stratum://localhost:3333
+sudo quaiminer-config set-node-rpc http://localhost:8545
+sudo systemctl start quaiminer</code></pre>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <a href="https://github.com/thecrackofdan/quaiminer-core" class="cta-primary" target="_blank">Download from GitHub</a>
+                </div>
+
+                <p style="margin-top: 2rem; color: var(--quai-gray); font-size: 0.9rem;">
+                    📖 Full documentation available in the <code>quaiminer-os/</code> directory
                 </p>
             </div>
         </div>
     </section>
 
-    <footer class="footer">
+    <section class="features-highlight">
         <div class="container">
-            <h3 style="margin-bottom: 1rem;">QuaiMiner CORE</h3>
-            <p style="opacity: 0.8; margin-bottom: 1rem;">Complete toolkit for Quai Network mining</p>
-            <div class="footer-links">
-                <a href="https://github.com/thecrackofdan/quaiminer-core" target="_blank">GitHub Repository</a>
-                <a href="https://github.com/thecrackofdan/quaiminer-core/issues" target="_blank">Report Issues</a>
-                <a href="CONTRIBUTING.md">Contributing</a>
-                <a href="README.md">Documentation</a>
-                <a href="miner-dashboard/README.md">Dashboard Documentation</a>
-                <a href="LICENSE">License</a>
+            <h2 class="section-title">What's Included</h2>
+            <p class="section-subtitle">Everything you need for automated solo mining</p>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-item-icon">⚙️</div>
+                    <div class="feature-item-content">
+                        <h4>Automated Miner Installation</h4>
+                        <p>Installs and configures quai-gpu-miner automatically from source or pre-built binaries</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-icon">🔄</div>
+                    <div class="feature-item-content">
+                        <h4>Systemd Service</h4>
+                        <p>Runs as a system service with auto-start on boot and automatic restart on failure</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-icon">🌐</div>
+                    <div class="feature-item-content">
+                        <h4>Web Dashboard</h4>
+                        <p>Monitor hashrate, temperature, and rewards. Control mining from anywhere</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-icon">📝</div>
+                    <div class="feature-item-content">
+                        <h4>Configuration Manager</h4>
+                        <p>Easy command-line tool to configure stratum proxy, node RPC, and depool settings</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-icon">🎮</div>
+                    <div class="feature-item-content">
+                        <h4>AMD RX 590 Support</h4>
+                        <p>Specialized setup scripts, optimization profiles, and tuning tools for RX 590</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-item-icon">🔍</div>
+                    <div class="feature-item-content">
+                        <h4>Verification Tools</h4>
+                        <p>Built-in tools to verify GPU detection, OpenCL support, and system configuration</p>
+                    </div>
+                </div>
             </div>
-            <p style="margin-top: 2rem; opacity: 0.6; font-size: 0.875rem;">
-                © 2024 QuaiMiner CORE. Open source software for the Quai Network community.
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <h3 style="color: var(--quai-red); margin-bottom: 1rem;">QuaiMiner OS</h3>
+            <p style="color: var(--quai-gray); margin-bottom: 2rem;">Automated solo mining management for Quai Network</p>
+            <div class="footer-links">
+                <a href="https://github.com/thecrackofdan/quaiminer-core" target="_blank">GitHub</a>
+                <a href="https://github.com/thecrackofdan/quaiminer-core/issues" target="_blank">Report Issues</a>
+                <a href="quaiminer-os/README.md">Documentation</a>
+                <a href="quaiminer-os/QUICK_START.md">Quick Start</a>
+                <a href="https://qu.ai" target="_blank">Quai Network</a>
+            </div>
+            <p style="margin-top: 2rem; color: var(--quai-gray-dark); font-size: 0.875rem;">
+                © 2024 QuaiMiner OS. Open source software for the Quai Network community.
             </p>
         </div>
     </footer>
 </body>
 </html>
-

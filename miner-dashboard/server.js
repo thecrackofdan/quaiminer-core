@@ -251,6 +251,232 @@ app.get('/api/export', (req, res) => {
     }
 });
 
+// Miner control endpoints (for QuaiMiner OS integration)
+let minerAPI = null;
+try {
+    minerAPI = require('../quaiminer-os/miner-api.js');
+} catch (error) {
+    console.warn('QuaiMiner OS API not available:', error.message);
+    // Create a mock API for development
+    minerAPI = {
+        getMinerStatus: async () => ({ status: 'unavailable', error: 'QuaiMiner OS not installed' }),
+        startMiner: async () => ({ success: false, error: 'QuaiMiner OS not installed' }),
+        stopMiner: async () => ({ success: false, error: 'QuaiMiner OS not installed' }),
+        restartMiner: async () => ({ success: false, error: 'QuaiMiner OS not installed' }),
+        getConfig: async () => ({ success: false, error: 'QuaiMiner OS not installed' }),
+        updateConfig: async () => ({ success: false, error: 'QuaiMiner OS not installed' }),
+        getMinerLogs: async () => ({ success: false, error: 'QuaiMiner OS not installed' })
+    };
+}
+
+app.get('/api/miner/status', async (req, res) => {
+    try {
+        const status = await minerAPI.getMinerStatus();
+        res.json(status);
+    } catch (error) {
+        console.error('Error getting miner status:', error);
+        res.status(500).json({ error: 'Failed to get miner status', message: error.message });
+    }
+});
+
+app.post('/api/miner/start', async (req, res) => {
+    try {
+        const result = await minerAPI.startMiner();
+        res.json(result);
+    } catch (error) {
+        console.error('Error starting miner:', error);
+        res.status(500).json({ error: 'Failed to start miner', message: error.message });
+    }
+});
+
+app.post('/api/miner/stop', async (req, res) => {
+    try {
+        const result = await minerAPI.stopMiner();
+        res.json(result);
+    } catch (error) {
+        console.error('Error stopping miner:', error);
+        res.status(500).json({ error: 'Failed to stop miner', message: error.message });
+    }
+});
+
+app.post('/api/miner/restart', async (req, res) => {
+    try {
+        const result = await minerAPI.restartMiner();
+        res.json(result);
+    } catch (error) {
+        console.error('Error restarting miner:', error);
+        res.status(500).json({ error: 'Failed to restart miner', message: error.message });
+    }
+});
+
+app.get('/api/miner/config', async (req, res) => {
+    try {
+        const result = await minerAPI.getConfig();
+        res.json(result);
+    } catch (error) {
+        console.error('Error getting miner config:', error);
+        res.status(500).json({ error: 'Failed to get miner config', message: error.message });
+    }
+});
+
+app.post('/api/miner/config', async (req, res) => {
+    try {
+        const updates = req.body;
+        const result = await minerAPI.updateConfig(updates);
+        res.json(result);
+    } catch (error) {
+        console.error('Error updating miner config:', error);
+        res.status(500).json({ error: 'Failed to update miner config', message: error.message });
+    }
+});
+
+app.get('/api/miner/logs', async (req, res) => {
+    try {
+        const lines = parseInt(req.query.lines) || 100;
+        const result = await minerAPI.getMinerLogs(lines);
+        res.json(result);
+    } catch (error) {
+        console.error('Error getting miner logs:', error);
+        res.status(500).json({ error: 'Failed to get miner logs', message: error.message });
+    }
+});
+
+// Validated blocks tracking
+// Store validated blocks in memory (in production, use a database)
+let validatedBlocks = [];
+const fs = require('fs').promises;
+const BLOCKS_FILE = path.join(__dirname, 'data', 'validated-blocks.json');
+
+// Ensure data directory exists
+(async () => {
+    try {
+        await fs.mkdir(path.join(__dirname, 'data'), { recursive: true });
+        // Load existing blocks
+        try {
+            const data = await fs.readFile(BLOCKS_FILE, 'utf8');
+            validatedBlocks = JSON.parse(data);
+        } catch (e) {
+            // File doesn't exist yet, start with empty array
+            validatedBlocks = [];
+        }
+    } catch (error) {
+        console.warn('Could not initialize blocks storage:', error.message);
+    }
+})();
+
+// Save blocks to file
+async function saveBlocks() {
+    try {
+        await fs.writeFile(BLOCKS_FILE, JSON.stringify(validatedBlocks, null, 2), 'utf8');
+    } catch (error) {
+        console.error('Error saving validated blocks:', error);
+    }
+}
+
+// Get validated blocks
+app.get('/api/blocks/validated', async (req, res) => {
+    try {
+        const limit = Math.min(parseInt(req.query.limit) || 100, 500); // Max 500 blocks
+        const sortedBlocks = validatedBlocks
+            .sort((a, b) => b.blockNumber - a.blockNumber)
+            .slice(0, limit);
+        res.json({ 
+            blocks: sortedBlocks,
+            total: validatedBlocks.length
+        });
+    } catch (error) {
+        console.error('Error getting validated blocks:', error);
+        res.status(500).json({ error: 'Failed to get validated blocks', message: error.message });
+    }
+});
+
+// Add validated block (called when miner finds a block)
+app.post('/api/blocks/validated', async (req, res) => {
+    try {
+        const { blockNumber, blockHash, timestamp, chain, reward, txHash } = req.body;
+        
+        // Validation
+        if (!blockNumber) {
+            return res.status(400).json({ error: 'blockNumber is required' });
+        }
+        
+        const blockNum = parseInt(blockNumber);
+        if (isNaN(blockNum) || blockNum < 0) {
+            return res.status(400).json({ error: 'Invalid blockNumber' });
+        }
+        
+        const block = {
+            blockNumber: blockNum,
+            blockHash: blockHash || null,
+            timestamp: timestamp || Date.now(),
+            date: new Date(timestamp || Date.now()),
+            chain: chain || 'Prime',
+            reward: parseFloat(reward) || 0,
+            txHash: txHash || null,
+            id: `${blockNum}-${chain || 'Prime'}-${Date.now()}` // Unique ID
+        };
+        
+        // Check if block already exists (prevent duplicates)
+        const exists = validatedBlocks.find(b => 
+            b.blockNumber === block.blockNumber && 
+            b.chain === block.chain &&
+            (!block.blockHash || b.blockHash === block.blockHash)
+        );
+        
+        if (!exists) {
+            validatedBlocks.push(block);
+            
+            // Limit to last 1000 blocks to prevent memory issues
+            if (validatedBlocks.length > 1000) {
+                validatedBlocks = validatedBlocks
+                    .sort((a, b) => b.blockNumber - a.blockNumber)
+                    .slice(0, 1000);
+            }
+            
+            await saveBlocks();
+            res.json({ success: true, block });
+        } else {
+            res.json({ success: true, block: exists, message: 'Block already exists' });
+        }
+    } catch (error) {
+        console.error('Error adding validated block:', error);
+        res.status(500).json({ error: 'Failed to add validated block', message: error.message });
+    }
+});
+
+// Get block statistics
+app.get('/api/blocks/stats', async (req, res) => {
+    try {
+        const total = validatedBlocks.length;
+        const last24h = validatedBlocks.filter(b => {
+            const age = Date.now() - b.timestamp;
+            return age < 24 * 60 * 60 * 1000;
+        }).length;
+        
+        const last7d = validatedBlocks.filter(b => {
+            const age = Date.now() - b.timestamp;
+            return age < 7 * 24 * 60 * 60 * 1000;
+        }).length;
+        
+        const totalReward = validatedBlocks.reduce((sum, b) => sum + (b.reward || 0), 0);
+        
+        const lastBlock = validatedBlocks.length > 0 
+            ? validatedBlocks.sort((a, b) => b.blockNumber - a.blockNumber)[0]
+            : null;
+        
+        res.json({
+            total,
+            last24h,
+            last7d,
+            totalReward,
+            lastBlock
+        });
+    } catch (error) {
+        console.error('Error getting block stats:', error);
+        res.status(500).json({ error: 'Failed to get block stats', message: error.message });
+    }
+});
+
 // Serve index.html for all routes (SPA support)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
