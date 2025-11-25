@@ -270,6 +270,17 @@ class MiningDashboard {
             
             // Initialize miner configuration and remote management
             this.initMinerManagement();
+            
+            // Initialize notifications
+            this.initNotifications();
+            
+            // Initialize historical data tracking
+            this.initHistoricalData();
+            
+            // Initialize ML features
+            if (typeof MLFeatures !== 'undefined') {
+                this.mlFeatures = new MLFeatures(this);
+            }
     }
     
     /**
@@ -3987,6 +3998,135 @@ class MiningDashboard {
             successEl.style.display = 'block';
         }
         if (errorEl) errorEl.style.display = 'none';
+    }
+    
+    /**
+     * Initialize notifications system
+     */
+    initNotifications() {
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+        
+        // Check for new notifications every 30 seconds
+        this.notificationInterval = setInterval(() => {
+            if (!document.hidden) {
+                this.checkNotifications();
+            }
+        }, 30000);
+        
+        // Check immediately
+        this.checkNotifications();
+    }
+    
+    /**
+     * Check for new notifications
+     */
+    async checkNotifications() {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) return; // Not authenticated
+            
+            const response = await fetch('/api/notifications', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) return;
+            
+            const data = await response.json();
+            if (data.notifications && data.notifications.length > 0) {
+                data.notifications.forEach(notification => {
+                    this.showBrowserNotification(notification);
+                    // Mark as read
+                    fetch(`/api/notifications/${notification.id}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                });
+            }
+        } catch (error) {
+            console.error('Error checking notifications:', error);
+        }
+    }
+    
+    /**
+     * Show browser notification
+     */
+    showBrowserNotification(notification) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            const notif = new Notification(notification.title, {
+                body: notification.message,
+                icon: '/favicon.ico',
+                badge: '/favicon.ico',
+                tag: `notification-${notification.id}`,
+                requireInteraction: notification.type === 'block_found'
+            });
+            
+            notif.onclick = () => {
+                window.focus();
+                notif.close();
+            };
+        }
+    }
+    
+    /**
+     * Initialize historical data tracking
+     */
+    initHistoricalData() {
+        // Save mining stats to database every 30 seconds
+        this.historicalDataInterval = setInterval(() => {
+            if (!document.hidden && this.miningData.isMining) {
+                this.saveHistoricalStats();
+            }
+        }, 30000);
+    }
+    
+    /**
+     * Save current mining stats to database
+     */
+    async saveHistoricalStats() {
+        try {
+            const stat = {
+                timestamp: Date.now(),
+                hashRate: this.miningData.hashRate,
+                acceptedShares: this.miningData.acceptedShares,
+                rejectedShares: this.miningData.rejectedShares,
+                powerUsage: this.miningData.powerUsage,
+                temperature: this.miningData.gpus.length > 0 ? this.miningData.gpus[0].temperature : 0,
+                fanSpeed: this.miningData.gpus.length > 0 ? this.miningData.gpus[0].fanSpeed : 0,
+                gpuId: 0
+            };
+            
+            await fetch('/api/stats/history', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(stat)
+            });
+        } catch (error) {
+            console.error('Error saving historical stats:', error);
+        }
+    }
+    
+    /**
+     * Fetch historical data for charts
+     */
+    async fetchHistoricalData(hours = 24, gpuId = null) {
+        try {
+            const params = new URLSearchParams({ hours, ...(gpuId !== null && { gpuId }) });
+            const response = await fetch(`/api/stats/history?${params}`);
+            if (!response.ok) throw new Error('Failed to fetch historical data');
+            
+            const data = await response.json();
+            return data.data || [];
+        } catch (error) {
+            console.error('Error fetching historical data:', error);
+            return [];
+        }
     }
 }
 

@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuaiMiner CORE - Mining Dashboard</title>
+    <meta name="theme-color" content="#FF0000">
+    <meta name="description" content="Production-ready real-time dashboard for solo mining Quai Network">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192.png">
     <!-- Quai Network Typography - Inter Font Family -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -606,6 +610,25 @@
     <script src="js/utils.js"></script>
     <script src="js/config.js"></script>
     <script src="js/dashboard.js"></script>
+    <script src="js/historical-charts.js"></script>
+    <script src="js/profitability-calculator.js"></script>
+    <script src="js/multi-gpu.js"></script>
+    <script src="js/ml-features.js"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
 

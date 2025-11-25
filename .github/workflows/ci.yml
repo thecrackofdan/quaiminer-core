@@ -1,0 +1,94 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: miner-dashboard/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./miner-dashboard
+      run: npm ci
+    
+    - name: Run syntax check
+      working-directory: ./miner-dashboard
+      run: npm test
+    
+    - name: Run security audit
+      working-directory: ./miner-dashboard
+      run: npm audit --audit-level=moderate || true
+    
+    - name: Check code quality
+      working-directory: ./miner-dashboard
+      run: |
+        node -c server.js
+        node -c database.js
+        node -c auth.js
+        echo "✅ All syntax checks passed"
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build Docker image
+      working-directory: ./miner-dashboard
+      run: |
+        docker build -t quaiminer-dashboard:latest .
+    
+    - name: Test Docker image
+      working-directory: ./miner-dashboard
+      run: |
+        docker run -d --name test-dashboard -p 3000:3000 quaiminer-dashboard:latest
+        sleep 5
+        curl -f http://localhost:3000/api/health || exit 1
+        docker stop test-dashboard
+        docker rm test-dashboard
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [test, build-docker]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          Automated release from CI/CD pipeline
+          
+          Changes in this release:
+          - See commit history for details
+        draft: false
+        prerelease: false
+

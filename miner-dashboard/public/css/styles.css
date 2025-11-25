@@ -1813,7 +1813,48 @@ body {
     font-style: italic;
 }
 
+/* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
+    /* General layout */
+    .dashboard-container {
+        padding: 0.5rem;
+    }
+    
+    .dashboard-header {
+        padding: 1rem 0.5rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .header-right {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    /* Stats cards */
+    .mining-stats-hero {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .hero-stat-card {
+        padding: 1rem;
+    }
+    
+    .hero-stat-value {
+        font-size: 2rem;
+    }
+    
+    /* GPU cards */
+    .gpu-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Miner controls */
     .miner-control-buttons {
         flex-direction: column;
     }
@@ -1822,6 +1863,7 @@ body {
         width: 100%;
     }
     
+    /* Blocks stats */
     .blocks-stats-grid {
         grid-template-columns: 1fr;
     }
@@ -1835,6 +1877,333 @@ body {
     .block-item-reward {
         text-align: left;
         width: 100%;
+    }
+    
+    /* Modals */
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    /* Charts */
+    .chart-container {
+        height: 200px !important;
+    }
+    
+    /* Navigation */
+    .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    /* Forms */
+    input, select, textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Tables */
+    table {
+        font-size: 0.85rem;
+    }
+    
+    /* Buttons */
+    .cta-primary, .cta-secondary {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+}
+
+/* Historical Charts Section */
+.historical-charts-section {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.chart-card {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.chart-card h3 {
+    color: var(--quai-primary);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.chart-card canvas {
+    max-height: 250px;
+}
+
+/* Profitability Calculator */
+.profitability-section {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.calculator-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.input-group input {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.calculator-results {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.calculator-results h3 {
+    color: var(--quai-primary);
+    margin-bottom: 1rem;
+}
+
+.result-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--bg-card);
+    border-radius: 6px;
+}
+
+.result-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.result-value {
+    color: var(--quai-primary);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+}
+
+/* Multi-GPU Enhanced Visualization */
+.multi-gpu-section {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.gpu-grid-enhanced {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.gpu-card-enhanced {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+}
+
+.gpu-card-enhanced:hover {
+    border-color: var(--quai-primary);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.gpu-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.gpu-card-header h3 {
+    color: var(--quai-primary);
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.gpu-status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--success-color);
+}
+
+.gpu-status-indicator.warning {
+    background: var(--warning-color);
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.gpu-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.gpu-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.gpu-stat-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.gpu-stat-value {
+    color: var(--quai-primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.gpu-stat-value.warning {
+    color: var(--warning-color);
+}
+
+.gpu-stat-unit {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.gpu-efficiency {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--bg-card);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.efficiency-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.efficiency-value {
+    color: var(--success-color);
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.gpu-progress {
+    margin-top: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-card);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--quai-primary), var(--quai-primary-bright));
+    transition: width 0.3s;
+}
+
+.progress-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.no-gpus {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .calculator-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .gpu-grid-enhanced {
+        grid-template-columns: 1fr;
+    }
+    
+    .gpu-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .section-title-red {
+        font-size: 1.5rem;
+    }
+    
+    .block-stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .modal-content {
+        padding: 1rem;
     }
 }
 

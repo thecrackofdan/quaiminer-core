@@ -1,6 +1,10 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const helmet = require('helmet');
+const { apiLimiter, authLimiter, blockLimiter } = require('./middleware/rateLimit');
+const { blocks, stats, notifications, users } = require('./database');
+const { authenticate, optionalAuth, createDefaultUser, hashPassword, verifyPassword, generateToken, generateApiKey } = require('./auth');
 
 // Cross-platform fetch support
 // Node.js 18+ has built-in fetch, older versions need node-fetch
@@ -44,10 +48,15 @@ if (NODE_ENV === 'development') {
 const NODE_RPC_URL = process.env.NODE_RPC_URL || 'http://localhost:8545';
 const MINER_API_URL = process.env.MINER_API_URL || null; // e.g., 'http://localhost:4028/api' for Team Red Miner
 
-// Middleware
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: false, // Allow inline scripts for dashboard
+    crossOriginEmbedderPolicy: false
+}));
 app.use(cors());
-app.use(express.json()); // Parse JSON request bodies
+app.use(express.json({ limit: '10mb' })); // Parse JSON request bodies
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(apiLimiter); // Apply rate limiting to all routes
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -238,15 +247,67 @@ app.post('/api/node/rpc', async (req, res) => {
     }
 });
 
-// Data export endpoint
-app.get('/api/export', (req, res) => {
+// Export endpoints
+const exportService = require('./export');
+
+app.get('/api/export/pdf', optionalAuth, async (req, res) => {
     try {
-        const format = req.query.format || 'json'; // 'json' or 'csv'
-        // This would export current mining data
-        // Implementation depends on how you want to store/retrieve data
-        res.json({ message: 'Export functionality to be implemented' });
+        const options = {
+            startDate: req.query.startDate || null,
+            endDate: req.query.endDate || null,
+            includeCharts: req.query.includeCharts !== 'false',
+            includeStats: req.query.includeStats !== 'false'
+        };
+        
+        const result = await exportService.exportPDF(options);
+        res.download(result.filepath, result.filename, (err) => {
+            if (err) {
+                console.error('Error sending PDF:', err);
+                res.status(500).json({ error: 'Failed to send PDF' });
+            }
+        });
     } catch (error) {
-        console.error('Error in /api/export:', error);
+        console.error('Error exporting PDF:', error);
+        res.status(500).json({ error: 'Export failed', message: error.message });
+    }
+});
+
+app.get('/api/export/csv', optionalAuth, async (req, res) => {
+    try {
+        const options = {
+            type: req.query.type || 'blocks',
+            hours: parseInt(req.query.hours) || 24
+        };
+        
+        const result = await exportService.exportCSV(options);
+        res.download(result.filepath, result.filename, (err) => {
+            if (err) {
+                console.error('Error sending CSV:', err);
+                res.status(500).json({ error: 'Failed to send CSV' });
+            }
+        });
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        res.status(500).json({ error: 'Export failed', message: error.message });
+    }
+});
+
+app.get('/api/export/json', optionalAuth, async (req, res) => {
+    try {
+        const options = {
+            type: req.query.type || 'blocks',
+            hours: parseInt(req.query.hours) || 24
+        };
+        
+        const result = await exportService.exportJSON(options);
+        res.download(result.filepath, result.filename, (err) => {
+            if (err) {
+                console.error('Error sending JSON:', err);
+                res.status(500).json({ error: 'Failed to send JSON' });
+            }
+        });
+    } catch (error) {
+        console.error('Error exporting JSON:', error);
         res.status(500).json({ error: 'Export failed', message: error.message });
     }
 });
@@ -341,48 +402,84 @@ app.get('/api/miner/logs', async (req, res) => {
     }
 });
 
-// Validated blocks tracking
-// Store validated blocks in memory (in production, use a database)
-let validatedBlocks = [];
-const fs = require('fs').promises;
-const BLOCKS_FILE = path.join(__dirname, 'data', 'validated-blocks.json');
+// Initialize default admin user
+createDefaultUser().catch(console.error);
 
-// Ensure data directory exists
-(async () => {
+// Cleanup old blocks periodically (keep last 1000)
+setInterval(() => {
+    blocks.deleteOld(1000);
+}, 60 * 60 * 1000); // Run every hour
+
+// Authentication endpoints
+app.post('/api/auth/login', authLimiter, async (req, res) => {
     try {
-        await fs.mkdir(path.join(__dirname, 'data'), { recursive: true });
-        // Load existing blocks
-        try {
-            const data = await fs.readFile(BLOCKS_FILE, 'utf8');
-            validatedBlocks = JSON.parse(data);
-        } catch (e) {
-            // File doesn't exist yet, start with empty array
-            validatedBlocks = [];
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password required' });
         }
-    } catch (error) {
-        console.warn('Could not initialize blocks storage:', error.message);
-    }
-})();
 
-// Save blocks to file
-async function saveBlocks() {
-    try {
-        await fs.writeFile(BLOCKS_FILE, JSON.stringify(validatedBlocks, null, 2), 'utf8');
-    } catch (error) {
-        console.error('Error saving validated blocks:', error);
-    }
-}
+        const user = users.findByUsername(username);
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
 
-// Get validated blocks
-app.get('/api/blocks/validated', async (req, res) => {
+        const valid = await verifyPassword(password, user.password_hash);
+        if (!valid) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const token = generateToken(user);
+        users.updateLastLogin(user.id);
+        
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Error in login:', error);
+        res.status(500).json({ error: 'Login failed', message: error.message });
+    }
+});
+
+app.post('/api/auth/register', authLimiter, async (req, res) => {
     try {
-        const limit = Math.min(parseInt(req.query.limit) || 100, 500); // Max 500 blocks
-        const sortedBlocks = validatedBlocks
-            .sort((a, b) => b.blockNumber - a.blockNumber)
-            .slice(0, limit);
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password required' });
+        }
+
+        if (users.findByUsername(username)) {
+            return res.status(400).json({ error: 'Username already exists' });
+        }
+
+        const passwordHash = await hashPassword(password);
+        const apiKey = generateApiKey();
+        const result = users.create(username, passwordHash, apiKey);
+
+        res.json({
+            success: true,
+            message: 'User created successfully',
+            apiKey: apiKey // Only shown once
+        });
+    } catch (error) {
+        console.error('Error in registration:', error);
+        res.status(500).json({ error: 'Registration failed', message: error.message });
+    }
+});
+
+// Get validated blocks (using database)
+app.get('/api/blocks/validated', optionalAuth, async (req, res) => {
+    try {
+        const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+        const dbBlocks = blocks.getAll(limit);
         res.json({ 
-            blocks: sortedBlocks,
-            total: validatedBlocks.length
+            blocks: dbBlocks,
+            total: blocks.getStats().total
         });
     } catch (error) {
         console.error('Error getting validated blocks:', error);
@@ -391,11 +488,10 @@ app.get('/api/blocks/validated', async (req, res) => {
 });
 
 // Add validated block (called when miner finds a block)
-app.post('/api/blocks/validated', async (req, res) => {
+app.post('/api/blocks/validated', blockLimiter, optionalAuth, async (req, res) => {
     try {
         const { blockNumber, blockHash, timestamp, chain, reward, txHash } = req.body;
         
-        // Validation
         if (!blockNumber) {
             return res.status(400).json({ error: 'blockNumber is required' });
         }
@@ -409,34 +505,27 @@ app.post('/api/blocks/validated', async (req, res) => {
             blockNumber: blockNum,
             blockHash: blockHash || null,
             timestamp: timestamp || Date.now(),
-            date: new Date(timestamp || Date.now()),
             chain: chain || 'Prime',
             reward: parseFloat(reward) || 0,
-            txHash: txHash || null,
-            id: `${blockNum}-${chain || 'Prime'}-${Date.now()}` // Unique ID
+            txHash: txHash || null
         };
         
-        // Check if block already exists (prevent duplicates)
-        const exists = validatedBlocks.find(b => 
-            b.blockNumber === block.blockNumber && 
-            b.chain === block.chain &&
-            (!block.blockHash || b.blockHash === block.blockHash)
-        );
+        const result = blocks.add(block);
         
-        if (!exists) {
-            validatedBlocks.push(block);
-            
-            // Limit to last 1000 blocks to prevent memory issues
-            if (validatedBlocks.length > 1000) {
-                validatedBlocks = validatedBlocks
-                    .sort((a, b) => b.blockNumber - a.blockNumber)
-                    .slice(0, 1000);
+        if (result.success) {
+            // Create notification for block find
+            if (req.user) {
+                notifications.create(
+                    req.user.id,
+                    'block_found',
+                    'Block Found!',
+                    `You found block #${blockNum} on ${block.chain} chain with reward ${block.reward} QUAI`
+                );
             }
             
-            await saveBlocks();
-            res.json({ success: true, block });
+            res.json({ success: true, block: { ...block, id: result.id } });
         } else {
-            res.json({ success: true, block: exists, message: 'Block already exists' });
+            res.json({ success: false, message: result.error });
         }
     } catch (error) {
         console.error('Error adding validated block:', error);
@@ -444,37 +533,88 @@ app.post('/api/blocks/validated', async (req, res) => {
     }
 });
 
-// Get block statistics
-app.get('/api/blocks/stats', async (req, res) => {
+// Get block statistics (using database)
+app.get('/api/blocks/stats', optionalAuth, async (req, res) => {
     try {
-        const total = validatedBlocks.length;
-        const last24h = validatedBlocks.filter(b => {
-            const age = Date.now() - b.timestamp;
-            return age < 24 * 60 * 60 * 1000;
-        }).length;
-        
-        const last7d = validatedBlocks.filter(b => {
-            const age = Date.now() - b.timestamp;
-            return age < 7 * 24 * 60 * 60 * 1000;
-        }).length;
-        
-        const totalReward = validatedBlocks.reduce((sum, b) => sum + (b.reward || 0), 0);
-        
-        const lastBlock = validatedBlocks.length > 0 
-            ? validatedBlocks.sort((a, b) => b.blockNumber - a.blockNumber)[0]
-            : null;
+        const blockStats = blocks.getStats();
+        const allBlocks = blocks.getAll(1);
+        const lastBlock = allBlocks.length > 0 ? allBlocks[0] : null;
         
         res.json({
-            total,
-            last24h,
-            last7d,
-            totalReward,
+            ...blockStats,
             lastBlock
         });
     } catch (error) {
         console.error('Error getting block stats:', error);
         res.status(500).json({ error: 'Failed to get block stats', message: error.message });
     }
+});
+
+// Historical mining statistics
+app.post('/api/stats/history', optionalAuth, async (req, res) => {
+    try {
+        const stat = req.body;
+        stats.add(stat);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error saving mining stats:', error);
+        res.status(500).json({ error: 'Failed to save stats', message: error.message });
+    }
+});
+
+app.get('/api/stats/history', optionalAuth, async (req, res) => {
+    try {
+        const hours = parseInt(req.query.hours) || 24;
+        const gpuId = req.query.gpuId ? parseInt(req.query.gpuId) : null;
+        const aggregated = req.query.aggregated === 'true';
+        
+        if (aggregated) {
+            const interval = parseInt(req.query.interval) || 60;
+            const data = stats.getAggregated(hours, interval);
+            res.json({ data });
+        } else {
+            const data = stats.getHistory(hours, gpuId);
+            res.json({ data });
+        }
+    } catch (error) {
+        console.error('Error getting mining stats history:', error);
+        res.status(500).json({ error: 'Failed to get stats', message: error.message });
+    }
+});
+
+// Notifications endpoints
+app.get('/api/notifications', authenticate, async (req, res) => {
+    try {
+        const unread = notifications.getUnread(req.user.id);
+        res.json({ notifications: unread });
+    } catch (error) {
+        console.error('Error getting notifications:', error);
+        res.status(500).json({ error: 'Failed to get notifications', message: error.message });
+    }
+});
+
+app.post('/api/notifications/:id/read', authenticate, async (req, res) => {
+    try {
+        const notificationId = parseInt(req.params.id);
+        notifications.markRead(notificationId, req.user.id);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        res.status(500).json({ error: 'Failed to update notification', message: error.message });
+    }
+});
+
+// Serve index.html for all routes (SPA support)
+// Serve PWA manifest
+app.get('/manifest.json', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+});
+
+// Serve service worker
+app.get('/sw.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'sw.js'), {
+        headers: { 'Content-Type': 'application/javascript' }
+    });
 });
 
 // Serve index.html for all routes (SPA support)
