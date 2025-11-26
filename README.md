@@ -2,6 +2,14 @@
 
 **Complete multi-GPU, multi-rig operating system for solo mining Quai Network**
 
+> ⚠️ **CURRENT STATUS: BETA / TESTING PHASE**  
+> **Version 2.1-beta** - This release is currently in testing and has not yet been:
+> - Deployed or tested on Linux systems
+> - Tested on Quai Network mainnet
+> - Tested in production environments
+> 
+> See [TESTING_STATUS.md](TESTING_STATUS.md) for detailed testing status and requirements.
+
 QuaiMiner CORE OS is a comprehensive mining operating system with tools, scripts, and resources designed specifically for solo mining Quai Network. Built for miners running their own Quai node, it includes:
 
 - 🎮 **Multi-GPU Support** - Automatically detect and manage multiple GPUs (NVIDIA & AMD, including mixed setups)
