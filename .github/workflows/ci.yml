@@ -26,7 +26,12 @@ jobs:
     
     - name: Install dependencies
       working-directory: ./miner-dashboard
-      run: npm ci
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci || npm install
+        else
+          npm install
+        fi
     
     - name: Run syntax check
       working-directory: ./miner-dashboard
@@ -77,18 +82,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Create Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
-        body: |
-          Automated release from CI/CD pipeline
-          
-          Changes in this release:
-          - See commit history for details
-        draft: false
-        prerelease: false
+    # Note: Automated releases are handled by release.yml workflow
+    # This job is disabled to avoid duplicate releases
+    - name: Skip automated release
+      run: echo "Releases are handled by release.yml workflow"
 
