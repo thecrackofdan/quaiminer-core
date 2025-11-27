@@ -1,4 +1,4 @@
-// Database module for QuaiMiner CORE
+// Database module for Quai GPU Miner
 // Uses SQLite for data persistence
 
 const Database = require('better-sqlite3');

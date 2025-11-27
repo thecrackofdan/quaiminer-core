@@ -37,7 +37,7 @@ class ExportService {
             doc.pipe(stream);
             
             // Header
-            doc.fontSize(20).text('QuaiMiner CORE Report', { align: 'center' });
+            doc.fontSize(20).text('Quai GPU Miner Report', { align: 'center' });
             doc.moveDown();
             doc.fontSize(12).text(`Generated: ${new Date().toLocaleString()}`, { align: 'center' });
             doc.moveDown(2);

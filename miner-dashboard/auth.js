@@ -1,4 +1,4 @@
-// Authentication module for QuaiMiner CORE
+// Authentication module for Quai GPU Miner
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');

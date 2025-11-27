@@ -55,7 +55,7 @@
 .insight-card {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1rem;
     transition: all 0.3s;
 }
@@ -123,7 +123,7 @@
     padding: 0.75rem;
     margin-bottom: 0.5rem;
     background: var(--bg-card);
-    border-radius: 6px;
+    border-radius: 0;
     border-left: 3px solid var(--border-color);
     transition: all 0.3s;
 }
@@ -163,7 +163,7 @@
     background: var(--quai-primary);
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 0;
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -180,7 +180,7 @@
     padding: 2px 8px;
     background: var(--success-color);
     color: #000;
-    border-radius: 12px;
+    border-radius: 0;
     font-size: 0.7rem;
     font-weight: 600;
     margin-left: 0.5rem;
@@ -190,7 +190,7 @@
     margin-top: 1.5rem;
     padding: 1rem;
     background: var(--bg-card);
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -217,6 +217,125 @@ h1, h2, h3, h4, h5, h6 {
 
 button, .btn {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Sophisticated Dashboard Styling - Sharp Corners, Clean Design */
+.dashboard-container {
+    min-height: 100vh;
+    background: var(--bg-dark);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.dashboard-header {
+    background: var(--bg-dark);
+    border-bottom: 2px solid var(--border-color);
+    padding: 1.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+.dashboard-header h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--quai-primary);
+    margin: 0;
+    letter-spacing: -0.03em;
+    text-transform: none;
+}
+
+.card, .stat-card, .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+
+.card:hover, .stat-card:hover, .metric-card:hover {
+    border-color: var(--quai-primary);
+    box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.1);
+}
+
+.btn, button {
+    border-radius: 0;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--quai-primary);
+    color: #fff;
+    border-color: var(--quai-primary);
+}
+
+.btn-primary:hover {
+    background: var(--quai-primary-bright);
+    border-color: var(--quai-primary-bright);
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--quai-primary);
+    color: var(--quai-primary);
+}
+
+/* Mobile Responsive - Real-time Monitoring */
+@media (max-width: 768px) {
+    .dashboard-header {
+        padding: 1rem;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .card, .stat-card, .metric-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Real-time updates visible on mobile */
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .metric-value {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header {
+        padding: 0.75rem;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .card, .stat-card, .metric-card {
+        padding: 0.75rem;
+    }
 }
 
 /* Tooltip Styles */
@@ -269,7 +388,7 @@ button, .btn {
     padding: 10px 14px;
     background: var(--bg-card);
     border: 2px solid var(--quai-primary);
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--text-primary);
     font-size: 0.85rem;
     line-height: 1.4;
@@ -312,7 +431,7 @@ button, .btn {
     padding: 8px 12px;
     background: var(--bg-dark);
     border: 2px solid var(--border-red);
-    border-radius: 6px;
+    border-radius: 0;
     color: var(--text-primary);
     font-size: 0.95rem;
     cursor: pointer;
@@ -380,7 +499,7 @@ body {
 /* Header */
 .dashboard-header {
     background: var(--bg-card);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 24px 32px;
     margin-bottom: 24px;
     border: 1px solid var(--border-color);
@@ -426,7 +545,7 @@ body {
     background: var(--bg-dark);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 6px 12px;
     font-size: 0.85rem;
     cursor: pointer;
@@ -458,7 +577,7 @@ body {
     background: var(--quai-primary);
     color: white;
     border: 1px solid var(--quai-primary);
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -488,7 +607,7 @@ body {
     background: var(--bg-dark);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
@@ -509,7 +628,7 @@ body {
 .address-input {
     padding: 8px 12px;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 0;
     background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 0.85rem;
@@ -545,7 +664,7 @@ body {
     font-family: 'JetBrains Mono', 'Courier New', monospace;
     background: var(--bg-dark);
     padding: 6px 12px;
-    border-radius: 6px;
+    border-radius: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -560,7 +679,6 @@ body {
     font-size: 2.5rem;
     font-weight: 800;
     color: var(--quai-primary);
-    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px rgba(255, 0, 0, 0.4);
     letter-spacing: -0.5px;
     margin-bottom: 8px;
 }
@@ -575,7 +693,7 @@ body {
 .network-badge {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 12px;
+    border-radius: 0;
     font-size: 0.75rem;
     font-weight: 600;
     background: rgba(220, 38, 38, 0.2);
@@ -600,35 +718,22 @@ body {
 .status-dot {
     width: 12px;
     height: 12px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--warning-color);
-    animation: pulse 2s infinite;
 }
 
 .status-dot.active {
-    background: #00FF00;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
-    animation: pulse-green 2s ease-in-out infinite;
+    background: #10B981;
 }
 
-@keyframes pulse-green {
-    0%, 100% {
-        box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(0, 255, 0, 1);
-    }
-}
+/* Removed pulse-green animation for professional look */
 
 .status-dot.inactive {
     background: var(--danger-color);
     animation: none;
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
+/* Removed pulse animation for professional look */
 
 /* Section Titles - PUNCHING Red */
 .section-title-red {
@@ -636,7 +741,6 @@ body {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--quai-primary);
-    text-shadow: 0 0 15px rgba(255, 0, 0, 0.6), 0 0 30px rgba(255, 0, 0, 0.3);
     margin-bottom: 20px;
     border-bottom: 2px solid var(--quai-primary);
     padding-bottom: 12px;
@@ -656,7 +760,7 @@ body {
 /* Personal Mining Section - TOP PRIORITY */
 .personal-mining-section {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 32px;
     margin-bottom: 24px;
     box-shadow: var(--shadow);
@@ -674,7 +778,7 @@ body {
 
 .hero-stat-card {
     background: var(--bg-dark);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 28px;
     display: flex;
     align-items: center;
@@ -714,7 +818,6 @@ body {
     font-size: 2.5rem;
     font-weight: 800;
     color: var(--quai-primary);
-    text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
     margin: 0;
     line-height: 1.2;
 }
@@ -730,7 +833,7 @@ body {
 /* GPU Section - Top Priority */
 .gpu-section-top {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 32px;
     margin-bottom: 24px;
     box-shadow: var(--shadow);
@@ -741,7 +844,6 @@ body {
     font-size: 1.75rem;
     font-weight: 800;
     color: var(--quai-primary);
-    text-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
     margin-bottom: 24px;
     border-bottom: 2px solid var(--quai-primary);
     padding-bottom: 12px;
@@ -757,7 +859,7 @@ body {
 
 .stat-card {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 24px;
     display: flex;
     align-items: center;
@@ -796,7 +898,6 @@ body {
     font-size: 2rem;
     font-weight: 800;
     color: var(--quai-primary);
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
     margin: 0;
     line-height: 1.2;
 }
@@ -818,7 +919,7 @@ body {
 /* GPU Section */
 .gpu-section {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 24px;
     margin-bottom: 32px;
     box-shadow: var(--shadow);
@@ -834,7 +935,7 @@ body {
 /* Enhanced GPU Cards */
 .gpu-card {
     background: var(--bg-dark);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 24px;
     border: 2px solid var(--border-red);
     transition: all 0.3s;
@@ -867,7 +968,7 @@ body {
 
 .gpu-card {
     background: var(--bg-dark);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 20px;
     border: 1px solid var(--border-color);
     transition: border-color 0.2s;
@@ -911,7 +1012,7 @@ body {
 .temperature-indicator {
     display: inline-block;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 0.85rem;
     font-weight: 600;
 }
@@ -941,7 +1042,7 @@ body {
 
 .chart-container {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 24px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
@@ -965,7 +1066,7 @@ body {
 .soap-banner {
     background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(153, 27, 27, 0.15));
     border: 1px solid rgba(220, 38, 38, 0.3);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 20px;
     box-shadow: var(--shadow), var(--shadow-red);
 }
@@ -999,7 +1100,7 @@ body {
 .algorithm-badge {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 0.85rem;
     font-weight: 600;
     margin-left: 8px;
@@ -1020,7 +1121,7 @@ body {
 .status-indicator-badge {
     display: inline-block;
     padding: 6px 16px;
-    border-radius: 12px;
+    border-radius: 0;
     font-size: 0.85rem;
     font-weight: 600;
     background: rgba(16, 185, 129, 0.2);
@@ -1036,7 +1137,7 @@ body {
 /* Rewards Section */
 .rewards-section {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 24px;
     margin-bottom: 32px;
     box-shadow: var(--shadow);
@@ -1057,7 +1158,7 @@ body {
 
 .reward-card {
     background: var(--bg-dark);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 24px;
     border: 2px solid var(--border-red);
     display: flex;
@@ -1113,7 +1214,6 @@ body {
     font-size: 2rem;
     font-weight: 900;
     color: var(--quai-primary);
-    text-shadow: 0 0 12px rgba(255, 0, 0, 0.7);
     margin: 0;
     line-height: 1.2;
 }
@@ -1133,7 +1233,7 @@ body {
 /* Network Status Section - Solo Miner Focused */
 .network-status-section {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 32px;
     margin-bottom: 24px;
     box-shadow: var(--shadow);
@@ -1144,7 +1244,6 @@ body {
     font-size: 1.75rem;
     font-weight: 800;
     color: var(--quai-primary);
-    text-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
     margin-bottom: 12px;
     border-bottom: 2px solid var(--quai-primary);
     padding-bottom: 12px;
@@ -1163,7 +1262,7 @@ body {
     align-items: center;
     padding: 16px 20px;
     background: var(--bg-dark);
-    border-radius: 8px;
+    border-radius: 0;
     border: 1px solid var(--border-red);
     transition: all 0.2s;
 }
@@ -1190,7 +1289,6 @@ body {
     font-weight: 700;
     color: var(--quai-primary);
     font-family: 'JetBrains Mono', 'Courier New', monospace;
-    text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1199,7 +1297,6 @@ body {
 .stratum-indicator {
     font-size: 0.75rem;
     color: var(--warning-color);
-    animation: pulse 2s infinite;
 }
 
 .stratum-indicator.connected {
@@ -1224,7 +1321,7 @@ body {
     background: var(--bg-dark);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s;
@@ -1250,7 +1347,7 @@ body {
 /* Transaction History Section */
 .tx-history-section {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 24px;
     margin-bottom: 32px;
     box-shadow: var(--shadow);
@@ -1329,7 +1426,7 @@ body {
     max-height: 500px;
     overflow-y: auto;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     background: var(--bg-dark);
 }
 
@@ -1388,7 +1485,7 @@ body {
 .tx-badge {
     display: inline-block;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 0;
     font-size: 0.75rem;
     font-weight: 600;
     background: rgba(220, 38, 38, 0.2);
@@ -1436,7 +1533,7 @@ body {
 /* Logs Section */
 .logs-section {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 24px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
@@ -1450,7 +1547,7 @@ body {
 
 .logs-container {
     background: var(--bg-dark);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 16px;
     max-height: 400px;
     overflow-y: auto;
@@ -1498,12 +1595,12 @@ body {
 
 .logs-container::-webkit-scrollbar-track {
     background: var(--bg-dark);
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .logs-container::-webkit-scrollbar-thumb {
     background: var(--border-color);
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .logs-container::-webkit-scrollbar-thumb:hover {
@@ -1547,7 +1644,7 @@ body {
     margin: -10px 0 0 -10px;
     border: 2px solid var(--quai-primary);
     border-top-color: transparent;
-    border-radius: 50%;
+    border-radius: 0;
     animation: spin 0.8s linear infinite;
 }
 
@@ -1636,7 +1733,7 @@ body {
     background: var(--bg-dark);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -1678,7 +1775,7 @@ body {
     margin: 5% auto;
     padding: 0;
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 0;
     width: 90%;
     max-width: 500px;
     box-shadow: var(--shadow-lg);
@@ -1711,7 +1808,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: 0;
     transition: all 0.2s;
 }
 
@@ -1765,7 +1862,7 @@ body {
 .alert-rule-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1rem;
     margin-bottom: 1rem;
     transition: all 0.3s;
@@ -1781,7 +1878,7 @@ body {
     padding: 0.75rem 1rem;
     margin-bottom: 0.5rem;
     background: var(--bg-card);
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 .form-group {
@@ -1802,7 +1899,7 @@ body {
     padding: 0.75rem;
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
+    border-radius: 0;
     color: var(--text-primary);
     font-family: 'Inter', sans-serif;
 }
@@ -1865,7 +1962,7 @@ body {
     background: var(--bg-dark);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 0;
     padding: 8px 12px;
     font-size: 0.9rem;
     width: 100px;
@@ -1882,7 +1979,7 @@ body {
     background: var(--danger-color);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 0;
     padding: 10px 20px;
     font-size: 0.9rem;
     font-weight: 600;
@@ -1905,7 +2002,7 @@ body {
     margin: 2rem 0;
     padding: 2rem;
     background: var(--bg-card);
-    border-radius: 12px;
+    border-radius: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -1919,7 +2016,7 @@ body {
 .miner-status-card {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
 }
 
@@ -1936,16 +2033,15 @@ body {
     margin-bottom: 1.5rem;
     padding: 1rem;
     background: var(--bg-card);
-    border-radius: 8px;
+    border-radius: 0;
 }
 
 .status-dot-large {
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--quai-gray-dark);
     display: inline-block;
-    animation: pulse 2s infinite;
 }
 
 .status-dot-large.running {
@@ -1969,7 +2065,7 @@ body {
     min-width: 120px;
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 6px;
+    border-radius: 0;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -1999,7 +2095,7 @@ body {
 .miner-logs-card {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
 }
 
@@ -2014,7 +2110,7 @@ body {
     margin: 2rem 0;
     padding: 2rem;
     background: var(--bg-card);
-    border-radius: 12px;
+    border-radius: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -2028,7 +2124,7 @@ body {
 .block-stat-card {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
     text-align: center;
     transition: all 0.3s;
@@ -2072,7 +2168,7 @@ body {
 .block-item {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1rem;
     display: flex;
     justify-content: space-between;
@@ -2131,7 +2227,7 @@ body {
     border: 1px solid var(--danger-color);
     color: var(--danger-color);
     padding: 1rem;
-    border-radius: 6px;
+    border-radius: 0;
 }
 
 .success-message {
@@ -2139,7 +2235,7 @@ body {
     border: 1px solid var(--success-color);
     color: var(--success-color);
     padding: 1rem;
-    border-radius: 6px;
+    border-radius: 0;
 }
 
 .setting-hint {
@@ -2256,7 +2352,7 @@ body {
     margin: 2rem 0;
     padding: 2rem;
     background: var(--bg-card);
-    border-radius: 12px;
+    border-radius: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -2270,7 +2366,7 @@ body {
 .chart-card {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
 }
 
@@ -2289,7 +2385,7 @@ body {
     margin: 2rem 0;
     padding: 2rem;
     background: var(--bg-card);
-    border-radius: 12px;
+    border-radius: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -2321,7 +2417,7 @@ body {
 .input-group input {
     padding: 0.75rem;
     border: 1px solid var(--border-color);
-    border-radius: 6px;
+    border-radius: 0;
     background: var(--bg-dark);
     color: var(--text-primary);
     font-size: 1rem;
@@ -2330,7 +2426,7 @@ body {
 .calculator-results {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 0;
     padding: 1.5rem;
 }
 
@@ -2351,7 +2447,7 @@ body {
     align-items: center;
     padding: 0.75rem;
     background: var(--bg-card);
-    border-radius: 6px;
+    border-radius: 0;
 }
 
 .result-label {
@@ -2371,7 +2467,7 @@ body {
     margin: 2rem 0;
     padding: 2rem;
     background: var(--bg-card);
-    border-radius: 12px;
+    border-radius: 0;
     border: 1px solid var(--border-color);
 }
 
@@ -2385,7 +2481,7 @@ body {
 .gpu-card-enhanced {
     background: var(--bg-dark);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 1.5rem;
     transition: all 0.3s;
 }
@@ -2412,7 +2508,7 @@ body {
 .gpu-status-indicator {
     width: 12px;
     height: 12px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--success-color);
 }
 
@@ -2461,7 +2557,7 @@ body {
     align-items: center;
     padding: 0.75rem;
     background: var(--bg-card);
-    border-radius: 6px;
+    border-radius: 0;
     margin-bottom: 1rem;
 }
 
@@ -2484,7 +2580,7 @@ body {
     width: 100%;
     height: 8px;
     background: var(--bg-card);
-    border-radius: 4px;
+    border-radius: 0;
     overflow: hidden;
     margin-bottom: 0.5rem;
 }
@@ -2529,7 +2625,7 @@ body {
 .testnet-banner {
     background: linear-gradient(135deg, rgba(255, 170, 0, 0.2), rgba(255, 200, 0, 0.1));
     border: 2px solid var(--warning-color);
-    border-radius: 12px;
+    border-radius: 0;
     padding: 1.5rem;
     margin: 1rem 0;
 }
@@ -2590,7 +2686,7 @@ body {
     transform: translate(-50%, -50%);
     background: var(--bg-dark);
     border: 2px solid var(--warning-color);
-    border-radius: 16px;
+    border-radius: 0;
     padding: 2rem;
     max-width: 500px;
     width: 90%;
@@ -2692,7 +2788,7 @@ textarea:focus-visible {
     padding: 8px 16px;
     text-decoration: none;
     z-index: 10001;
-    border-radius: 0 0 4px 0;
+    border-radius: 0;
 }
 
 .skip-to-main:focus {
@@ -2705,7 +2801,7 @@ textarea:focus-visible {
     width: 20px;
     height: 20px;
     border: 3px solid rgba(255, 0, 0, 0.3);
-    border-radius: 50%;
+    border-radius: 0;
     border-top-color: var(--quai-primary);
     animation: spin 1s ease-in-out infinite;
 }
@@ -2731,7 +2827,7 @@ button.loading::after {
     margin-left: -8px;
     margin-top: -8px;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
+    border-radius: 0;
     border-top-color: var(--text-primary);
     animation: spin 0.6s linear infinite;
 }
