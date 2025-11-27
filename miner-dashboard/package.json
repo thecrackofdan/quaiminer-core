@@ -81,11 +81,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/thecrackofdan/quai-gpu-miner.git",
+    "url": "https://github.com/thecrackofdan/Quai-GPU-Miner.git",
     "directory": "miner-dashboard"
   },
   "bugs": {
-    "url": "https://github.com/thecrackofdan/quai-gpu-miner/issues"
+    "url": "https://github.com/thecrackofdan/Quai-GPU-Miner/issues"
   },
-  "homepage": "https://github.com/thecrackofdan/quai-gpu-miner#readme"
+  "homepage": "https://github.com/thecrackofdan/Quai-GPU-Miner#readme"
 }

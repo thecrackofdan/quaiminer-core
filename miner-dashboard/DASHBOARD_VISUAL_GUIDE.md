@@ -25,7 +25,7 @@ The Quai Miner Dashboard features a **stunning dark theme** with **vibrant red a
 **Location**: Top of page
 
 **Features**:
-- ⚡ **QuaiMiner CORE OS** title with lightning bolt icon
+- ⚡ **Quai GPU Miner** title with lightning bolt icon
 - **Mining Mode Badges**: 
   - "ProgPoW" (algorithm)
   - "Solo Mining" (mining mode)

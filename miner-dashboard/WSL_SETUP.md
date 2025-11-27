@@ -133,8 +133,8 @@ For better performance, work directly in WSL filesystem:
 
 ```bash
 # Copy project to WSL filesystem
-cp -r /mnt/c/Users/thecr/Downloads/ddbba294-a955-46cc-9496-2a776d459433/New\ folder ~/quaiminer-core
-cd ~/quaiminer-core/miner-dashboard
+cp -r /mnt/c/Users/thecr/Downloads/ddbba294-a955-46cc-9496-2a776d459433/New\ folder ~/quai-gpu-miner
+cd ~/quai-gpu-miner/miner-dashboard
 
 # Much faster I/O performance!
 ```
@@ -171,13 +171,13 @@ find . -name "*.sh" -exec bash -n {} \;
 
 ```powershell
 # Access WSL files
-wsl ls ~/quaiminer-core/miner-dashboard
+wsl ls ~/quai-gpu-miner/miner-dashboard
 
 # Run commands in WSL
 wsl npm test
 
 # Start server in WSL
-wsl -d Ubuntu -e bash -c "cd ~/quaiminer-core/miner-dashboard && npm start"
+wsl -d Ubuntu -e bash -c "cd ~/quai-gpu-miner/miner-dashboard && npm start"
 ```
 
 ### From WSL

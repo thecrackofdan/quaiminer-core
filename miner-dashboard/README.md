@@ -70,8 +70,8 @@ sudo systemctl start quaiminer-dashboard
 
 2. **Clone this repository**:
    ```bash
-   git clone https://github.com/thecrackofdan/quaiminer-core.git
-   cd quaiminer-core/miner-dashboard
+   git clone https://github.com/thecrackofdan/Quai-GPU-Miner.git
+   cd Quai-GPU-Miner/miner-dashboard
    ```
 
 3. **Make the startup script executable**:
