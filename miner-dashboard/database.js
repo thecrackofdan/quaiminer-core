@@ -108,6 +108,50 @@ function initializeDatabase() {
         CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
     `);
 
+    // Alert rules table
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS alert_rules (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            condition TEXT NOT NULL,
+            enabled BOOLEAN DEFAULT 1,
+            channels TEXT NOT NULL,
+            cooldown INTEGER DEFAULT 300,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        
+        CREATE INDEX IF NOT EXISTS idx_alert_rules_enabled ON alert_rules(enabled);
+    `);
+
+    // Alert history table
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS alert_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rule_id TEXT NOT NULL,
+            rule_name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            channels TEXT NOT NULL,
+            timestamp INTEGER NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (rule_id) REFERENCES alert_rules(id)
+        );
+        
+        CREATE INDEX IF NOT EXISTS idx_alert_history_rule ON alert_history(rule_id);
+        CREATE INDEX IF NOT EXISTS idx_alert_history_timestamp ON alert_history(timestamp);
+    `);
+
+    // Alert configuration table
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS alert_config (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    `);
+
     console.log('✅ Database initialized successfully');
 }
 
@@ -326,6 +370,134 @@ const config = {
     }
 };
 
+// Alert rules
+const alertRules = {
+    getAll: () => {
+        return db.prepare('SELECT * FROM alert_rules ORDER BY name').all();
+    },
+
+    get: (id) => {
+        return db.prepare('SELECT * FROM alert_rules WHERE id = ?').get(id);
+    },
+
+    create: (rule) => {
+        const stmt = db.prepare(`
+            INSERT INTO alert_rules (id, name, type, condition, enabled, channels, cooldown)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+        return stmt.run(
+            rule.id,
+            rule.name,
+            rule.type,
+            JSON.stringify(rule.condition),
+            rule.enabled ? 1 : 0,
+            JSON.stringify(rule.channels || []),
+            rule.cooldown || 300
+        );
+    },
+
+    update: (id, updates) => {
+        const fields = [];
+        const values = [];
+        
+        if (updates.name !== undefined) {
+            fields.push('name = ?');
+            values.push(updates.name);
+        }
+        if (updates.condition !== undefined) {
+            fields.push('condition = ?');
+            values.push(JSON.stringify(updates.condition));
+        }
+        if (updates.enabled !== undefined) {
+            fields.push('enabled = ?');
+            values.push(updates.enabled ? 1 : 0);
+        }
+        if (updates.channels !== undefined) {
+            fields.push('channels = ?');
+            values.push(JSON.stringify(updates.channels));
+        }
+        if (updates.cooldown !== undefined) {
+            fields.push('cooldown = ?');
+            values.push(updates.cooldown);
+        }
+        
+        fields.push('updated_at = CURRENT_TIMESTAMP');
+        values.push(id);
+        
+        const stmt = db.prepare(`UPDATE alert_rules SET ${fields.join(', ')} WHERE id = ?`);
+        return stmt.run(...values);
+    },
+
+    delete: (id) => {
+        return db.prepare('DELETE FROM alert_rules WHERE id = ?').run(id);
+    }
+};
+
+// Alert history
+const alertHistory = {
+    add: (alert) => {
+        const stmt = db.prepare(`
+            INSERT INTO alert_history (rule_id, rule_name, type, message, channels, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        return stmt.run(
+            alert.ruleId,
+            alert.ruleName,
+            alert.type,
+            alert.message,
+            JSON.stringify(alert.channels || []),
+            alert.timestamp
+        );
+    },
+
+    getRecent: (limit = 100) => {
+        return db.prepare(`
+            SELECT * FROM alert_history 
+            ORDER BY timestamp DESC 
+            LIMIT ?
+        `).all(limit);
+    },
+
+    getByRule: (ruleId, limit = 50) => {
+        return db.prepare(`
+            SELECT * FROM alert_history 
+            WHERE rule_id = ? 
+            ORDER BY timestamp DESC 
+            LIMIT ?
+        `).all(ruleId, limit);
+    }
+};
+
+// Alert configuration
+const alertConfig = {
+    get: (key) => {
+        const result = db.prepare('SELECT value FROM alert_config WHERE key = ?').get(key);
+        return result ? JSON.parse(result.value) : null;
+    },
+
+    set: (key, value) => {
+        const stmt = db.prepare(`
+            INSERT INTO alert_config (key, value) 
+            VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = CURRENT_TIMESTAMP
+        `);
+        return stmt.run(key, JSON.stringify(value), JSON.stringify(value));
+    },
+
+    getAll: () => {
+        const results = db.prepare('SELECT * FROM alert_config').all();
+        const config = {};
+        results.forEach(row => {
+            try {
+                config[row.key] = JSON.parse(row.value);
+            } catch (e) {
+                config[row.key] = row.value;
+            }
+        });
+        return config;
+    }
+};
+
 module.exports = {
     db,
     blocks,
@@ -333,6 +505,9 @@ module.exports = {
     users,
     notifications,
     config,
+    alertRules,
+    alertHistory,
+    alertConfig,
     close: () => db.close()
 };
 

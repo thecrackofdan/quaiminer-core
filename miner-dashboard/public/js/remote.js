@@ -25,8 +25,8 @@ const installationInstructions = {
             <code>sudo dd if=quaiminer-core-os.iso of=/dev/sdX bs=4M status=progress</code>
             <p class="warning">⚠️ Replace /dev/sdX with your USB device (use lsblk to find it)</p>
             
-            <p><strong>Windows:</strong></p>
-            <p>Use <a href="https://rufus.ie/" target="_blank">Rufus</a> or <a href="https://www.balena.io/etcher" target="_blank">Balena Etcher</a> to flash the ISO to your USB drive.</p>
+            <p><strong>Linux:</strong></p>
+            <p>Use <code>dd</code> command or <a href="https://www.balena.io/etcher" target="_blank">Balena Etcher</a> to flash the ISO to your USB drive.</p>
             
             <h3>Step 4: Boot from USB</h3>
             <ol>

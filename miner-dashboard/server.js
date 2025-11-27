@@ -43,7 +43,13 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression'); // Performance: Response compression
 const { apiLimiter, authLimiter, blockLimiter } = require('./middleware/rateLimit');
-const { blocks, stats, notifications, users, config } = require('./database');
+const { blocks, stats, notifications, users, config, alertRules, alertHistory, alertConfig } = require('./database');
+const { getAlertManager } = require('./utils/alerts');
+const DifficultyTracker = require('./utils/difficulty-tracker');
+const AutoChainSwitcher = require('./utils/auto-chain-switcher');
+
+// Initialize alert manager
+const alertManager = getAlertManager();
 const { authenticate, optionalAuth, createDefaultUser, hashPassword, verifyPassword, generateToken, generateApiKey } = require('./auth');
 const { securityHeaders, sanitizeLogData, preventDirectoryTraversal, sanitizeFilePath } = require('./middleware/security');
 const { privacyHeaders, sanitizeResponse, maskWalletAddress, containsSensitiveData } = require('./middleware/privacy');
@@ -109,6 +115,13 @@ if (NODE_ENV === 'development') {
 // Configuration
 const NODE_RPC_URL = process.env.NODE_RPC_URL || 'http://localhost:8545';
 const MINER_API_URL = process.env.MINER_API_URL || null; // e.g., 'http://localhost:4028/api' for Team Red Miner
+
+// Initialize difficulty tracker
+const difficultyTracker = new DifficultyTracker(NODE_RPC_URL);
+difficultyTracker.start(300000); // Update every 5 minutes
+
+// Initialize auto chain switcher
+const autoChainSwitcher = new AutoChainSwitcher(NODE_RPC_URL);
 
 // Security middleware
 app.use(helmet({
@@ -206,6 +219,89 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
+});
+
+// Hardware detection endpoints
+app.get('/api/hardware/detect', async (req, res) => {
+    try {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        
+        let gpu = null;
+        
+        // Check for NVIDIA
+        try {
+            const { stdout } = await execAsync('lspci | grep -i nvidia | head -1');
+            if (stdout) {
+                const model = stdout.split(':')[2]?.trim() || 'NVIDIA GPU';
+                gpu = { vendor: 'nvidia', model: model };
+            }
+        } catch (e) {
+            // Not NVIDIA
+        }
+        
+        // Check for AMD if not NVIDIA
+        if (!gpu) {
+            try {
+                const { stdout } = await execAsync('lspci | grep -i "radeon\\|amd\\|ati" | head -1');
+                if (stdout) {
+                    const model = stdout.split(':')[2]?.trim() || 'AMD GPU';
+                    gpu = { vendor: 'amd', model: model };
+                }
+            } catch (e) {
+                // Not AMD
+            }
+        }
+        
+        res.json({ success: true, gpu });
+    } catch (error) {
+        logger.error('Error detecting hardware:', error);
+        res.status(500).json({ error: 'Failed to detect hardware', message: error.message });
+    }
+});
+
+app.get('/api/hardware/drivers', async (req, res) => {
+    try {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+        
+        let installed = false;
+        let version = null;
+        let vendor = null;
+        
+        // Check NVIDIA
+        try {
+            const { stdout } = await execAsync('nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>/dev/null | head -1');
+            if (stdout) {
+                installed = true;
+                version = stdout.trim();
+                vendor = 'nvidia';
+            }
+        } catch (e) {
+            // Not NVIDIA or drivers not installed
+        }
+        
+        // Check AMD if not NVIDIA
+        if (!installed) {
+            try {
+                const { stdout } = await execAsync('clinfo -l 2>/dev/null | grep -i "amd\\|mesa" | head -1');
+                if (stdout) {
+                    installed = true;
+                    version = 'OpenCL (Mesa/AMD)';
+                    vendor = 'amd';
+                }
+            } catch (e) {
+                // AMD drivers not installed
+            }
+        }
+        
+        res.json({ success: true, installed, version, vendor });
+    } catch (error) {
+        logger.error('Error checking drivers:', error);
+        res.status(500).json({ error: 'Failed to check drivers', message: error.message });
+    }
 });
 
 // Error logging endpoint
@@ -2119,10 +2215,138 @@ createDefaultUser().catch((error) => {
     logger.error('Error creating default user', error);
 });
 
+// Initialize alert manager and load rules from database
+try {
+    const dbRules = alertRules.getAll();
+    dbRules.forEach(rule => {
+        alertManager.addAlertRule({
+            ...rule,
+            condition: JSON.parse(rule.condition),
+            channels: JSON.parse(rule.channels),
+            enabled: rule.enabled === 1
+        });
+    });
+    logger.info(`Loaded ${dbRules.length} alert rules from database`);
+} catch (error) {
+    logger.error('Error loading alert rules:', error);
+}
+
+// Alert monitoring - check mining stats every 30 seconds
+setInterval(async () => {
+    try {
+        if (MINER_API_URL && fetch) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            try {
+                const minerResponse = await fetch(MINER_API_URL, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (minerResponse.ok) {
+                    const minerData = await minerResponse.json();
+                    const stats = {
+                        isMining: minerData.is_mining !== false,
+                        hashRate: minerData.hashrate || minerData.hash_rate || 0,
+                        acceptedShares: minerData.shares?.accepted || minerData.accepted_shares || 0,
+                        rejectedShares: minerData.shares?.rejected || minerData.rejected_shares || 0,
+                        rejectRate: (minerData.shares?.rejected || 0) / ((minerData.shares?.accepted || 0) + (minerData.shares?.rejected || 0) || 1),
+                        gpus: minerData.gpus || minerData.devices || []
+                    };
+                    
+                    // Check for GPU-specific alerts
+                    if (stats.gpus && stats.gpus.length > 0) {
+                        for (const gpu of stats.gpus) {
+                            await alertManager.checkMiningStats({
+                                ...stats,
+                                gpuName: gpu.name || `GPU ${gpu.id}`,
+                                temperature: gpu.temperature,
+                                status: gpu.status || 'ok'
+                            });
+                        }
+                    } else {
+                        await alertManager.checkMiningStats(stats);
+                    }
+                }
+            } catch (error) {
+                // Miner API unavailable - check if rig is down
+                await alertManager.checkMiningStats({
+                    isMining: false,
+                    hashRate: 0,
+                    status: 'error',
+                    error: 'Miner API unavailable'
+                });
+            }
+        }
+    } catch (error) {
+        logger.error('Error in alert monitoring:', error);
+    }
+}, 30000); // Check every 30 seconds
+
 // Cleanup old blocks periodically (keep last 1000)
 setInterval(() => {
     blocks.deleteOld(1000);
 }, 60 * 60 * 1000); // Run every hour
+
+// Alert monitoring - check mining stats every 30 seconds
+setInterval(async () => {
+    try {
+        if (MINER_API_URL && fetch) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            try {
+                const minerResponse = await fetch(MINER_API_URL, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (minerResponse.ok) {
+                    const minerData = await minerResponse.json();
+                    const stats = {
+                        isMining: minerData.is_mining !== false,
+                        hashRate: minerData.hashrate || minerData.hash_rate || 0,
+                        acceptedShares: minerData.shares?.accepted || minerData.accepted_shares || 0,
+                        rejectedShares: minerData.shares?.rejected || minerData.rejected_shares || 0,
+                        rejectRate: (minerData.shares?.rejected || 0) / ((minerData.shares?.accepted || 0) + (minerData.shares?.rejected || 0) || 1),
+                        gpus: minerData.gpus || minerData.devices || []
+                    };
+                    
+                    // Check for GPU-specific alerts
+                    if (stats.gpus && stats.gpus.length > 0) {
+                        for (const gpu of stats.gpus) {
+                            await alertManager.checkMiningStats({
+                                ...stats,
+                                gpuName: gpu.name || `GPU ${gpu.id}`,
+                                temperature: gpu.temperature,
+                                status: gpu.status || 'ok'
+                            });
+                        }
+                    } else {
+                        await alertManager.checkMiningStats(stats);
+                    }
+                }
+            } catch (error) {
+                // Miner API unavailable - check if rig is down
+                await alertManager.checkMiningStats({
+                    isMining: false,
+                    hashRate: 0,
+                    status: 'error',
+                    error: 'Miner API unavailable'
+                });
+            }
+        }
+    } catch (error) {
+        logger.error('Error in alert monitoring:', error);
+    }
+}, 30000); // Check every 30 seconds
 
 // Authentication endpoints
 app.post('/api/auth/login', authLimiter, async (req, res) => {
@@ -2370,6 +2594,11 @@ app.get('/mobile', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'mobile.html'));
 });
 
+// Serve setup page
+app.get('/setup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'setup.html'));
+});
+
 // Serve remote.html as default landing page
 app.get('/', (req, res) => {
     // Check if user wants dashboard or landing page
@@ -2382,14 +2611,167 @@ app.get('/', (req, res) => {
         // Direct dashboard access
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     } else {
-        // Default to remote landing page
-        res.sendFile(path.join(__dirname, 'public', 'remote.html'));
+        // Default to setup page
+        res.sendFile(path.join(__dirname, 'public', 'setup.html'));
     }
 });
 
 // Serve index.html for dashboard route
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Difficulty tracking endpoints
+app.get('/api/difficulty/current', optionalAuth, async (req, res) => {
+    try {
+        const difficulties = difficultyTracker.getAllDifficulties();
+        res.json({ success: true, difficulties });
+    } catch (error) {
+        logger.error('Error getting current difficulties:', error);
+        res.status(500).json({ error: 'Failed to get difficulties', message: error.message });
+    }
+});
+
+app.get('/api/difficulty/chain/:chainName', optionalAuth, async (req, res) => {
+    try {
+        const chainName = req.params.chainName;
+        const difficulty = difficultyTracker.getDifficulty(chainName);
+        
+        if (difficulty === null) {
+            return res.status(404).json({ error: 'Chain not found or difficulty not available' });
+        }
+        
+        res.json({ success: true, chain: chainName, difficulty });
+    } catch (error) {
+        logger.error('Error getting chain difficulty:', error);
+        res.status(500).json({ error: 'Failed to get difficulty', message: error.message });
+    }
+});
+
+app.get('/api/difficulty/profitable', optionalAuth, async (req, res) => {
+    try {
+        const blockRewards = req.query.rewards ? JSON.parse(req.query.rewards) : {};
+        const mostProfitable = difficultyTracker.getMostProfitableChain(blockRewards);
+        res.json({ success: true, ...mostProfitable });
+    } catch (error) {
+        logger.error('Error calculating profitability:', error);
+        res.status(500).json({ error: 'Failed to calculate profitability', message: error.message });
+    }
+});
+
+app.get('/api/difficulty/history', optionalAuth, async (req, res) => {
+    try {
+        const hours = parseInt(req.query.hours) || 24;
+        const history = difficultyTracker.getHistory(hours);
+        res.json({ success: true, history });
+    } catch (error) {
+        logger.error('Error getting difficulty history:', error);
+        res.status(500).json({ error: 'Failed to get history', message: error.message });
+    }
+});
+
+app.get('/api/difficulty/trends', optionalAuth, async (req, res) => {
+    try {
+        const hours = parseInt(req.query.hours) || 24;
+        const chainName = req.query.chain;
+        
+        if (chainName) {
+            const trend = difficultyTracker.getTrends(chainName, hours);
+            res.json({ success: true, trend });
+        } else {
+            const trends = difficultyTracker.getAllTrends(hours);
+            res.json({ success: true, trends });
+        }
+    } catch (error) {
+        logger.error('Error getting difficulty trends:', error);
+        res.status(500).json({ error: 'Failed to get trends', message: error.message });
+    }
+});
+
+// Auto chain switcher endpoints
+app.get('/api/auto-switch/status', optionalAuth, async (req, res) => {
+    try {
+        const status = autoChainSwitcher.getStatus();
+        res.json({ success: true, ...status });
+    } catch (error) {
+        logger.error('Error getting auto-switch status:', error);
+        res.status(500).json({ error: 'Failed to get status', message: error.message });
+    }
+});
+
+app.post('/api/auto-switch/start', authenticate, async (req, res) => {
+    try {
+        autoChainSwitcher.start();
+        res.json({ success: true, message: 'Auto chain switching started' });
+    } catch (error) {
+        logger.error('Error starting auto-switch:', error);
+        res.status(500).json({ error: 'Failed to start auto-switch', message: error.message });
+    }
+});
+
+app.post('/api/auto-switch/stop', authenticate, async (req, res) => {
+    try {
+        autoChainSwitcher.stop();
+        res.json({ success: true, message: 'Auto chain switching stopped' });
+    } catch (error) {
+        logger.error('Error stopping auto-switch:', error);
+        res.status(500).json({ error: 'Failed to stop auto-switch', message: error.message });
+    }
+});
+
+app.post('/api/auto-switch/switch', authenticate, async (req, res) => {
+    try {
+        const { chain } = req.body;
+        if (!chain) {
+            return res.status(400).json({ error: 'Chain name required' });
+        }
+        
+        await autoChainSwitcher.switchToChain(chain);
+        res.json({ success: true, message: `Switched to ${chain}` });
+    } catch (error) {
+        logger.error('Error switching chain:', error);
+        res.status(500).json({ error: 'Failed to switch chain', message: error.message });
+    }
+});
+
+app.post('/api/auto-switch/sharding/enable', authenticate, async (req, res) => {
+    try {
+        const { zones } = req.body;
+        autoChainSwitcher.enableSharding(zones);
+        res.json({ success: true, message: 'Zone sharding enabled' });
+    } catch (error) {
+        logger.error('Error enabling sharding:', error);
+        res.status(500).json({ error: 'Failed to enable sharding', message: error.message });
+    }
+});
+
+app.post('/api/auto-switch/sharding/disable', authenticate, async (req, res) => {
+    try {
+        autoChainSwitcher.disableSharding();
+        res.json({ success: true, message: 'Zone sharding disabled' });
+    } catch (error) {
+        logger.error('Error disabling sharding:', error);
+        res.status(500).json({ error: 'Failed to disable sharding', message: error.message });
+    }
+});
+
+app.post('/api/auto-switch/config', authenticate, async (req, res) => {
+    try {
+        const { threshold, blockRewards } = req.body;
+        
+        if (threshold !== undefined) {
+            autoChainSwitcher.setThreshold(threshold);
+        }
+        
+        if (blockRewards) {
+            autoChainSwitcher.updateBlockRewards(blockRewards);
+        }
+        
+        res.json({ success: true, message: 'Configuration updated' });
+    } catch (error) {
+        logger.error('Error updating auto-switch config:', error);
+        res.status(500).json({ error: 'Failed to update config', message: error.message });
+    }
 });
 
 // Serve index.html for all other routes (SPA support)

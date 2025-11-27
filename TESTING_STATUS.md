@@ -22,7 +22,7 @@
 
 ## 🚧 Known Limitations
 
-1. **Platform Testing**: Currently only tested in development environment (Windows)
+1. **Platform Testing**: Linux-only standalone OS - requires testing on physical hardware
 2. **Network Testing**: Not tested on Quai Network mainnet
 3. **Hardware Testing**: Limited GPU hardware testing
 4. **Performance Testing**: Not yet benchmarked on production hardware

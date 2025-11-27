@@ -1806,6 +1806,116 @@ body {
     padding: 24px;
 }
 
+/* Alert Manager Styles */
+.alert-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 0, 0, 0.1);
+}
+
+.tab-btn.active {
+    color: var(--quai-primary);
+    border-bottom-color: var(--quai-primary);
+}
+
+.alert-tab-content {
+    display: none;
+}
+
+.alert-tab-content.active {
+    display: block;
+}
+
+.alert-rule-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+}
+
+.alert-rule-card:hover {
+    border-color: var(--quai-primary);
+    box-shadow: var(--shadow-red);
+}
+
+.alert-history-item {
+    border-left: 3px solid var(--quai-primary);
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-card);
+    border-radius: 4px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--quai-primary);
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.close {
+    color: var(--text-secondary);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover {
+    color: var(--quai-primary);
+}
+
 .setting-item {
     margin-bottom: 20px;
     padding-bottom: 20px;

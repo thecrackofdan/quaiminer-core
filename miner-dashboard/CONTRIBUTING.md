@@ -1,18 +1,18 @@
 # Contributing to Quai Mining Dashboard
 
-Thank you for your interest in contributing! This is an open-source project that runs on Windows, Linux, and macOS.
+Thank you for your interest in contributing! This is an open-source project that runs **exclusively on Linux**.
 
-## 🌍 Cross-Platform Development
+## 🐧 Linux-Only Development
 
-This project is designed to work on multiple operating systems. When contributing:
+This project is designed as a standalone Linux operating system for Quai mining. When contributing:
 
 ### Platform Considerations
 
-1. **File Paths**: Use `path.join()` instead of hardcoded paths
-2. **Line Endings**: Git handles this automatically (LF for Unix, CRLF for Windows)
-3. **Scripts**: Provide both `.sh` (Linux/macOS) and `.bat` (Windows) versions when possible
-4. **Dependencies**: Ensure all npm packages work cross-platform
-5. **Testing**: Test on multiple platforms if possible
+1. **File Paths**: Use Linux paths (`/opt/quaiminer`, `/etc/quaiminer`, etc.)
+2. **Line Endings**: Use LF (Unix) line endings only
+3. **Scripts**: All scripts must be bash shell scripts (`.sh`)
+4. **Dependencies**: All dependencies must work on Linux
+5. **Testing**: Test on Linux systems only (Ubuntu 20.04+ recommended)
 
 ### Code Style
 
@@ -57,12 +57,13 @@ npm start
 
 Before submitting:
 
-- [ ] Code works on your platform
+- [ ] Code works on Linux (Ubuntu 20.04+)
 - [ ] No linter errors
-- [ ] All file references are cross-platform
+- [ ] All file references use Linux paths
 - [ ] Documentation updated if needed
 - [ ] Comments reference official sources
-- [ ] No hardcoded paths or OS-specific code
+- [ ] All scripts are bash shell scripts
+- [ ] Systemd services configured correctly
 
 ## 📚 Documentation
 

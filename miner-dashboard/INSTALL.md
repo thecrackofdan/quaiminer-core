@@ -1,28 +1,17 @@
-# Installation Guide - Cross-Platform
+# Installation Guide - Linux Standalone OS
 
 ## Prerequisites
 
 ### Required
+- **Linux System** (Ubuntu 20.04+ or Debian 11+ recommended)
 - **Node.js 14+** (recommended: 18+ LTS)
-  - Download: https://nodejs.org/
-  - Includes npm (Node Package Manager)
-
-### Optional (Fallback)
-- **Python 3.x** (for simple HTTP server if Node.js unavailable)
-  - Most Linux/macOS systems have this pre-installed
-  - Windows: Download from https://www.python.org/
+- **Root/sudo access** for system installation
 
 ---
 
 ## Installation Steps
 
 ### Step 1: Install Node.js
-
-#### Windows
-1. Download installer from https://nodejs.org/
-2. Run installer (check "Add to PATH" option)
-3. Restart terminal/command prompt
-4. Verify: `node --version` and `npm --version`
 
 #### Linux (Ubuntu/Debian)
 ```bash
@@ -102,8 +91,8 @@ This starts the Express server on `http://localhost:3000`
 
 ### Method 2: Platform Launchers
 
-**Windows:**
-- Double-click `LAUNCH_DASHBOARD.bat`
+**Linux:**
+- Run `./start.sh` or `npm start`
 
 **Linux/macOS:**
 ```bash
@@ -123,15 +112,11 @@ node server.js
 
 ### "node: command not found"
 
-**Windows:**
-- Restart terminal after Node.js installation
-- Check PATH: `echo %PATH%` (should include Node.js)
-- Reinstall Node.js if needed
-
-**Linux/macOS:**
+**Linux:**
+**Linux:**
 - Verify installation: `which node`
 - Add to PATH if needed
-- Reinstall using package manager
+- Reinstall using package manager: `sudo apt-get install nodejs npm`
 
 ### "npm: command not found"
 
@@ -173,7 +158,7 @@ Linux/macOS:
 lsof -ti:3000 | xargs kill
 ```
 
-Windows:
+Linux:
 ```cmd
 netstat -ano | findstr :3000
 taskkill /PID <PID> /F
@@ -184,7 +169,7 @@ taskkill /PID <PID> /F
 ## System Requirements
 
 ### Minimum
-- **OS**: Windows 10, Linux (Ubuntu 18.04+), macOS 10.14+
+- **OS**: Linux (Ubuntu 20.04+ or Debian 11+)
 - **RAM**: 100 MB
 - **Disk**: 50 MB
 - **Node.js**: 14.0.0+

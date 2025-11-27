@@ -1,344 +1,536 @@
 /**
- * Advanced Alert Manager - Multi-channel alerting system
- * Supports Email, SMS, Telegram, Discord, and Push notifications
+ * Alert Manager - Client-side alert management UI
+ * Provides interface for configuring alerts, viewing history, and testing
  */
 
 class AlertManager {
     constructor(dashboard) {
         this.dashboard = dashboard;
-        this.alertChannels = {
-            email: { enabled: false },
-            sms: { enabled: false },
-            telegram: { enabled: false },
-            discord: { enabled: false },
-            push: { enabled: false }
-        };
-        this.alertRules = [];
-        this.alertHistory = [];
+        this.rules = [];
+        this.config = {};
+        this.history = [];
         this.init();
     }
 
-    init() {
-        this.loadAlertSettings();
-        this.setupDefaultRules();
-        this.startMonitoring();
+    async init() {
+        await this.loadRules();
+        await this.loadConfig();
+        await this.loadHistory();
+        this.setupUI();
     }
 
     /**
-     * Load alert settings from server
+     * Load alert rules from server
      */
-    async loadAlertSettings() {
+    async loadRules() {
         try {
-            const response = await fetch('/api/alerts/settings');
+            const response = await fetch('/api/alerts/rules', {
+                headers: {
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                }
+            });
             if (response.ok) {
                 const data = await response.json();
-                if (data.success) {
-                    this.alertChannels = data.settings?.channels || this.alertChannels;
-                    this.alertRules = data.settings?.rules || [];
+                this.rules = data.rules || [];
+            }
+        } catch (error) {
+            console.error('Error loading alert rules:', error);
+        }
+    }
+
+    /**
+     * Load alert configuration
+     */
+    async loadConfig() {
+        try {
+            const response = await fetch('/api/alerts/config', {
+                headers: {
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                this.config = data.config || {};
+            }
+        } catch (error) {
+            console.error('Error loading alert config:', error);
+        }
+    }
+
+    /**
+     * Load alert history
+     */
+    async loadHistory() {
+        try {
+            const response = await fetch('/api/alerts/history?limit=50', {
+                headers: {
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                this.history = data.history || [];
+            }
+        } catch (error) {
+            console.error('Error loading alert history:', error);
+        }
+    }
+
+    /**
+     * Setup UI elements
+     */
+    setupUI() {
+        // Create alert settings button if it doesn't exist
+        this.createAlertSettingsButton();
+        
+        // Create alert modal if it doesn't exist
+        this.createAlertModal();
+    }
+
+    /**
+     * Create alert settings button
+     */
+    createAlertSettingsButton() {
+        // Check if button already exists
+        if (document.getElementById('alertSettingsBtn')) return;
+
+        // Find a good place to add the button (near other settings)
+        const header = document.querySelector('.header') || document.querySelector('header');
+        if (header) {
+            const btn = document.createElement('button');
+            btn.id = 'alertSettingsBtn';
+            btn.className = 'btn btn-secondary';
+            btn.innerHTML = '🔔 Alerts';
+            btn.onclick = () => this.showAlertModal();
+            header.appendChild(btn);
+        }
+    }
+
+    /**
+     * Create alert configuration modal
+     */
+    createAlertModal() {
+        if (document.getElementById('alertModal')) return;
+
+        const modal = document.createElement('div');
+        modal.id = 'alertModal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 900px;">
+                <div class="modal-header">
+                    <h2>🔔 Alert Configuration</h2>
+                    <span class="close" onclick="this.closest('.modal').style.display='none'">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="alert-tabs">
+                        <button class="tab-btn active" onclick="alertManager.showTab('rules')">Alert Rules</button>
+                        <button class="tab-btn" onclick="alertManager.showTab('channels')">Notification Channels</button>
+                        <button class="tab-btn" onclick="alertManager.showTab('history')">Alert History</button>
+                    </div>
+                    
+                    <div id="alertRulesTab" class="alert-tab-content active">
+                        <div style="margin-bottom: 1rem;">
+                            <button class="btn btn-primary" onclick="alertManager.addRule()">+ Add Alert Rule</button>
+                        </div>
+                        <div id="alertRulesList"></div>
+                    </div>
+                    
+                    <div id="alertChannelsTab" class="alert-tab-content">
+                        <h3>Email Configuration</h3>
+                        <div class="form-group">
+                            <label>SMTP Host:</label>
+                            <input type="text" id="emailHost" placeholder="smtp.gmail.com" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>SMTP Port:</label>
+                            <input type="number" id="emailPort" placeholder="587" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Email (from):</label>
+                            <input type="email" id="emailUser" placeholder="your-email@gmail.com" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Password/App Password:</label>
+                            <input type="password" id="emailPass" placeholder="App password" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Send To:</label>
+                            <input type="email" id="emailTo" placeholder="alerts@example.com" class="form-control">
+                        </div>
+                        <button class="btn btn-primary" onclick="alertManager.saveEmailConfig()">Save Email Config</button>
+                        <button class="btn btn-secondary" onclick="alertManager.testAlert('email')">Test Email</button>
+                        
+                        <h3 style="margin-top: 2rem;">Telegram Configuration</h3>
+                        <div class="form-group">
+                            <label>Bot Token:</label>
+                            <input type="text" id="telegramToken" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz" class="form-control">
+                            <small>Get from @BotFather on Telegram</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Chat ID:</label>
+                            <input type="text" id="telegramChatId" placeholder="123456789" class="form-control">
+                            <small>Get from @userinfobot on Telegram</small>
+                        </div>
+                        <button class="btn btn-primary" onclick="alertManager.saveTelegramConfig()">Save Telegram Config</button>
+                        <button class="btn btn-secondary" onclick="alertManager.testAlert('telegram')">Test Telegram</button>
+                        
+                        <h3 style="margin-top: 2rem;">Discord Configuration</h3>
+                        <div class="form-group">
+                            <label>Webhook URL:</label>
+                            <input type="url" id="discordWebhook" placeholder="https://discord.com/api/webhooks/..." class="form-control">
+                            <small>Create webhook in Discord channel settings</small>
+                        </div>
+                        <button class="btn btn-primary" onclick="alertManager.saveDiscordConfig()">Save Discord Config</button>
+                        <button class="btn btn-secondary" onclick="alertManager.testAlert('discord')">Test Discord</button>
+                    </div>
+                    
+                    <div id="alertHistoryTab" class="alert-tab-content">
+                        <div id="alertHistoryList"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    /**
+     * Show alert modal
+     */
+    showAlertModal() {
+        const modal = document.getElementById('alertModal');
+        if (modal) {
+            modal.style.display = 'block';
+            this.showTab('rules');
+            this.renderRules();
+            this.renderHistory();
+            this.loadConfigIntoForm();
+        }
+    }
+
+    /**
+     * Show tab
+     */
+    showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.alert-tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Show selected tab
+        const tab = document.getElementById(`alert${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`);
+        if (tab) {
+            tab.classList.add('active');
+        }
+        
+        // Activate button
+        event.target.classList.add('active');
+    }
+
+    /**
+     * Render alert rules
+     */
+    renderRules() {
+        const container = document.getElementById('alertRulesList');
+        if (!container) return;
+
+        if (this.rules.length === 0) {
+            container.innerHTML = '<p>No alert rules configured. Click "Add Alert Rule" to create one.</p>';
+            return;
+        }
+
+        container.innerHTML = this.rules.map(rule => `
+            <div class="alert-rule-card" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h4>${rule.name}</h4>
+                        <p><strong>Type:</strong> ${rule.type}</p>
+                        <p><strong>Condition:</strong> ${rule.condition.field} ${rule.condition.operator} ${rule.condition.value}</p>
+                        <p><strong>Channels:</strong> ${rule.channels.join(', ')}</p>
+                        <p><strong>Cooldown:</strong> ${rule.cooldown}s</p>
+                        <p><strong>Status:</strong> <span style="color: ${rule.enabled ? 'green' : 'gray'}">${rule.enabled ? 'Enabled' : 'Disabled'}</span></p>
+                    </div>
+                    <div>
+                        <button class="btn btn-small" onclick="alertManager.editRule('${rule.id}')">Edit</button>
+                        <button class="btn btn-small btn-danger" onclick="alertManager.deleteRule('${rule.id}')">Delete</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * Render alert history
+     */
+    renderHistory() {
+        const container = document.getElementById('alertHistoryList');
+        if (!container) return;
+
+        if (this.history.length === 0) {
+            container.innerHTML = '<p>No alerts triggered yet.</p>';
+            return;
+        }
+
+        container.innerHTML = this.history.map(alert => `
+            <div class="alert-history-item" style="border-left: 3px solid #ff6b6b; padding: 0.5rem 1rem; margin-bottom: 0.5rem; background: #f9f9f9;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong>${alert.rule_name}</strong>
+                        <p style="margin: 0.25rem 0; color: #666;">${alert.message}</p>
+                        <small style="color: #999;">${new Date(alert.timestamp).toLocaleString()}</small>
+                    </div>
+                    <div>
+                        <span style="background: #e0e0e0; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+                            ${alert.channels.join(', ')}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * Load config into form
+     */
+    loadConfigIntoForm() {
+        if (this.config.email) {
+            document.getElementById('emailHost').value = this.config.email.smtp?.host || '';
+            document.getElementById('emailPort').value = this.config.email.smtp?.port || '';
+            document.getElementById('emailUser').value = this.config.email.smtp?.auth?.user || '';
+            document.getElementById('emailTo').value = this.config.email.to || '';
+        }
+        if (this.config.telegram) {
+            document.getElementById('telegramToken').value = this.config.telegram.botToken || '';
+            document.getElementById('telegramChatId').value = this.config.telegram.chatId || '';
+        }
+        if (this.config.discord) {
+            document.getElementById('discordWebhook').value = this.config.discord.webhookUrl || '';
+        }
+    }
+
+    /**
+     * Add new alert rule
+     */
+    addRule() {
+        const rule = {
+            id: 'rule_' + Date.now(),
+            name: 'New Alert Rule',
+            type: 'rig_status',
+            condition: { field: 'isMining', operator: 'equals', value: false },
+            enabled: true,
+            channels: ['email'],
+            cooldown: 300
+        };
+        this.saveRule(rule);
+    }
+
+    /**
+     * Save alert rule
+     */
+    async saveRule(rule) {
+        try {
+            const response = await fetch('/api/alerts/rules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                },
+                body: JSON.stringify(rule)
+            });
+            
+            if (response.ok) {
+                await this.loadRules();
+                this.renderRules();
+                if (typeof Toast !== 'undefined') {
+                    Toast.success('Alert rule saved');
                 }
             }
         } catch (error) {
-            console.error('Error loading alert settings:', error);
-        }
-    }
-
-    /**
-     * Setup default alert rules
-     */
-    setupDefaultRules() {
-        if (this.alertRules.length === 0) {
-            this.alertRules = [
-                {
-                    id: 'hash-rate-drop',
-                    name: 'Hash Rate Drop',
-                    condition: 'hashRate < (average * 0.8)',
-                    enabled: true,
-                    channels: ['email', 'telegram'],
-                    cooldown: 300000 // 5 minutes
-                },
-                {
-                    id: 'high-temperature',
-                    name: 'High Temperature',
-                    condition: 'temperature > 80',
-                    enabled: true,
-                    channels: ['email', 'telegram', 'discord'],
-                    cooldown: 600000 // 10 minutes
-                },
-                {
-                    id: 'miner-crash',
-                    name: 'Miner Crash',
-                    condition: 'isMining === false && wasMining === true',
-                    enabled: true,
-                    channels: ['email', 'sms', 'telegram', 'discord'],
-                    cooldown: 0
-                },
-                {
-                    id: 'block-found',
-                    name: 'Block Found',
-                    condition: 'blocksFound > previousBlocksFound',
-                    enabled: true,
-                    channels: ['email', 'telegram', 'push'],
-                    cooldown: 0
-                },
-                {
-                    id: 'gpu-failure',
-                    name: 'GPU Failure',
-                    condition: 'gpuHashRate === 0 && gpuTemp > 0',
-                    enabled: true,
-                    channels: ['email', 'sms', 'telegram'],
-                    cooldown: 0
-                }
-            ];
-        }
-    }
-
-    /**
-     * Start monitoring for alerts
-     */
-    startMonitoring() {
-        setInterval(() => {
-            this.checkAlerts();
-        }, 30000); // Check every 30 seconds
-    }
-
-    /**
-     * Check all alert rules
-     */
-    async checkAlerts() {
-        if (!this.dashboard || !this.dashboard.miningData) return;
-
-        const data = this.dashboard.miningData;
-        
-        for (const rule of this.alertRules) {
-            if (!rule.enabled) continue;
-            
-            // Check cooldown
-            const lastTrigger = this.alertHistory.find(h => h.ruleId === rule.id);
-            if (lastTrigger && (Date.now() - lastTrigger.timestamp) < rule.cooldown) {
-                continue;
-            }
-            
-            // Evaluate condition
-            if (this.evaluateCondition(rule.condition, data)) {
-                await this.triggerAlert(rule, data);
+            console.error('Error saving alert rule:', error);
+            if (typeof Toast !== 'undefined') {
+                Toast.error('Failed to save alert rule');
             }
         }
     }
 
     /**
-     * Evaluate alert condition - SECURE VERSION (no eval)
+     * Delete alert rule
      */
-    evaluateCondition(condition, data) {
+    async deleteRule(ruleId) {
+        if (!confirm('Are you sure you want to delete this alert rule?')) return;
+
         try {
-            // SECURITY: Use safe expression parser instead of eval
-            // Parse condition safely without eval
-            const context = {
-                hashRate: data.hashRate || 0,
-                temperature: data.gpus?.[0]?.temperature || 0,
-                isMining: data.isMining || false,
-                blocksFound: data.blocksFound || 0,
-                average: this.calculateAverage('hashRate'),
-                previousBlocksFound: this.getPreviousValue('blocksFound'),
-                gpuHashRate: data.gpus?.[0]?.hashRate || 0,
-                gpuTemp: data.gpus?.[0]?.temperature || 0,
-                wasMining: this.getPreviousValue('isMining')
-            };
-            
-            // SECURITY: Safe condition evaluation without eval
-            // Only allow simple comparisons: <, >, <=, >=, ===, !==
-            const safeCondition = this.sanitizeCondition(condition);
-            if (!safeCondition) {
-                console.warn('Unsafe condition detected, skipping:', condition);
-                return false;
-            }
-            
-            // Use SafeEvaluator for secure expression evaluation
-            if (typeof SafeEvaluator !== 'undefined') {
-                const evaluator = new SafeEvaluator();
-                return evaluator.evaluateComparison(safeCondition, context);
-            }
-            
-            // Fallback: Manual evaluation for simple cases
-            // Replace variables with values
-            let expression = safeCondition;
-            Object.keys(context).forEach(key => {
-                // SECURITY: Only replace if key is a valid identifier
-                if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
-                    const value = context[key];
-                    // SECURITY: Only replace with numeric values
-                    if (typeof value === 'number' && isFinite(value)) {
-                        const regex = new RegExp(`\\b${key}\\b`, 'g');
-                        expression = expression.replace(regex, value.toString());
-                    }
+            const response = await fetch(`/api/alerts/rules/${ruleId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
                 }
             });
             
-            // SECURITY: Final validation - only numbers, operators, parentheses
-            const cleaned = expression.replace(/\s/g, '');
-            if (!/^[0-9+\-*/().<>=!&|]+$/.test(cleaned)) {
-                console.warn('[AlertManager] Invalid expression after processing:', expression);
-                return false;
-            }
-            
-            // SECURITY: Use Function constructor with additional validation
-            try {
-                // Double-check: no function calls, no eval, no require
-                if (/[a-zA-Z]/.test(cleaned.replace(/Math\.(abs|min|max|floor|ceil|round)/g, ''))) {
-                    console.warn('[AlertManager] Expression contains non-numeric content:', expression);
-                    return false;
+            if (response.ok) {
+                await this.loadRules();
+                this.renderRules();
+                if (typeof Toast !== 'undefined') {
+                    Toast.success('Alert rule deleted');
                 }
-                
-                const func = new Function('return ' + expression);
-                const result = func();
-                
-                // Validate result is boolean or number
-                if (typeof result === 'boolean' || (typeof result === 'number' && isFinite(result))) {
-                    return Boolean(result);
-                }
-                
-                return false;
-            } catch (error) {
-                console.error('[AlertManager] Error evaluating condition:', error);
-                return false;
             }
         } catch (error) {
-            console.error('Error evaluating condition:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Sanitize condition to prevent code injection
-     */
-    sanitizeCondition(condition) {
-        // Only allow safe operators and variable names
-        // Remove any potentially dangerous code
-        const safePattern = /^[\w\s<>=!&|().+-]+$/;
-        
-        // Remove any function calls, brackets, quotes, etc.
-        const cleaned = condition
-            .replace(/[\[\]{}'";]/g, '') // Remove dangerous characters
-            .replace(/function|eval|exec|script/gi, '') // Remove dangerous keywords
-            .trim();
-        
-        if (!safePattern.test(cleaned)) {
-            return null; // Unsafe condition
-        }
-        
-        // Only allow specific operators
-        const allowedOperators = ['<', '>', '<=', '>=', '===', '!==', '==', '!=', '&&', '||'];
-        const hasAllowedOperator = allowedOperators.some(op => cleaned.includes(op));
-        
-        if (!hasAllowedOperator) {
-            return null; // No valid operator
-        }
-        
-        return cleaned;
-    }
-
-    /**
-     * Trigger an alert
-     */
-    async triggerAlert(rule, data) {
-        const message = this.formatAlertMessage(rule, data);
-        
-        // Send to all enabled channels
-        for (const channel of rule.channels) {
-            if (this.alertChannels[channel]?.enabled) {
-                await this.sendAlert(channel, rule.name, message);
+            console.error('Error deleting alert rule:', error);
+            if (typeof Toast !== 'undefined') {
+                Toast.error('Failed to delete alert rule');
             }
         }
-        
-        // Log alert
-        this.alertHistory.push({
-            ruleId: rule.id,
-            timestamp: Date.now(),
-            message: message
-        });
-        
-        // Keep only last 100 alerts
-        if (this.alertHistory.length > 100) {
-            this.alertHistory.shift();
+    }
+
+    /**
+     * Save email configuration
+     */
+    async saveEmailConfig() {
+        const emailConfig = {
+            enabled: true,
+            smtp: {
+                host: document.getElementById('emailHost').value,
+                port: parseInt(document.getElementById('emailPort').value) || 587,
+                secure: false,
+                auth: {
+                    user: document.getElementById('emailUser').value,
+                    pass: document.getElementById('emailPass').value
+                }
+            },
+            to: document.getElementById('emailTo').value
+        };
+
+        try {
+            const response = await fetch('/api/alerts/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                },
+                body: JSON.stringify({ email: emailConfig })
+            });
+            
+            if (response.ok) {
+                if (typeof Toast !== 'undefined') {
+                    Toast.success('Email configuration saved');
+                }
+            }
+        } catch (error) {
+            console.error('Error saving email config:', error);
+            if (typeof Toast !== 'undefined') {
+                Toast.error('Failed to save email config');
+            }
         }
     }
 
     /**
-     * Send alert to specific channel
+     * Save Telegram configuration
      */
-    async sendAlert(channel, title, message) {
+    async saveTelegramConfig() {
+        const telegramConfig = {
+            enabled: true,
+            botToken: document.getElementById('telegramToken').value,
+            chatId: document.getElementById('telegramChatId').value
+        };
+
         try {
-            const response = await fetch('/api/alerts/send', {
+            const response = await fetch('/api/alerts/config', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                },
+                body: JSON.stringify({ telegram: telegramConfig })
+            });
+            
+            if (response.ok) {
+                if (typeof Toast !== 'undefined') {
+                    Toast.success('Telegram configuration saved');
+                }
+            }
+        } catch (error) {
+            console.error('Error saving Telegram config:', error);
+            if (typeof Toast !== 'undefined') {
+                Toast.error('Failed to save Telegram config');
+            }
+        }
+    }
+
+    /**
+     * Save Discord configuration
+     */
+    async saveDiscordConfig() {
+        const discordConfig = {
+            enabled: true,
+            webhookUrl: document.getElementById('discordWebhook').value
+        };
+
+        try {
+            const response = await fetch('/api/alerts/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                },
+                body: JSON.stringify({ discord: discordConfig })
+            });
+            
+            if (response.ok) {
+                if (typeof Toast !== 'undefined') {
+                    Toast.success('Discord configuration saved');
+                }
+            }
+        } catch (error) {
+            console.error('Error saving Discord config:', error);
+            if (typeof Toast !== 'undefined') {
+                Toast.error('Failed to save Discord config');
+            }
+        }
+    }
+
+    /**
+     * Test alert
+     */
+    async testAlert(channel) {
+        try {
+            const response = await fetch('/api/alerts/test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.dashboard.getAuthToken()}`,
+                    'X-API-Key': this.dashboard.getApiKey()
+                },
                 body: JSON.stringify({
-                    channel,
-                    title,
-                    message
+                    channel: channel,
+                    rule: { name: 'Test Alert', type: 'rig_status' }
                 })
             });
             
             if (response.ok) {
-                const data = await response.json();
-                if (data.success) {
-                    console.log(`Alert sent via ${channel}:`, title);
+                if (typeof Toast !== 'undefined') {
+                    Toast.success(`Test alert sent via ${channel}`);
                 }
             }
         } catch (error) {
-            console.error(`Error sending alert via ${channel}:`, error);
-        }
-    }
-
-    /**
-     * Format alert message
-     */
-    formatAlertMessage(rule, data) {
-        const timestamp = new Date().toLocaleString();
-        return `[${timestamp}] ${rule.name}\n\n` +
-               `Hash Rate: ${data.hashRate || 0} MH/s\n` +
-               `Temperature: ${data.gpus?.[0]?.temperature || 0}°C\n` +
-               `Status: ${data.isMining ? 'Mining' : 'Stopped'}\n` +
-               `GPUs: ${data.gpus?.length || 0}`;
-    }
-
-    /**
-     * Calculate average for metric
-     */
-    calculateAverage(metric) {
-        // Get recent values from dashboard
-        if (this.dashboard && this.dashboard.runningAverages) {
-            const values = this.dashboard.runningAverages[metric] || [];
-            if (values.length > 0) {
-                return values.reduce((a, b) => a + b, 0) / values.length;
+            console.error('Error sending test alert:', error);
+            if (typeof Toast !== 'undefined') {
+                Toast.error('Failed to send test alert');
             }
         }
-        return 0;
-    }
-
-    /**
-     * Get previous value
-     */
-    getPreviousValue(metric) {
-        // Store previous values
-        if (!this.previousValues) {
-            this.previousValues = {};
-        }
-        return this.previousValues[metric] || 0;
-    }
-
-    /**
-     * Update previous values
-     */
-    updatePreviousValues(data) {
-        if (!this.previousValues) {
-            this.previousValues = {};
-        }
-        this.previousValues.isMining = data.isMining;
-        this.previousValues.blocksFound = data.blocksFound || 0;
     }
 }
 
-// Export for use in dashboard
+// Export
 if (typeof window !== 'undefined') {
     window.AlertManager = AlertManager;
 }
-

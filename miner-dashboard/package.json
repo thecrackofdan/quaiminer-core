@@ -1,7 +1,7 @@
 {
-  "name": "quaiminer-core-os-dashboard",
+  "name": "quai-gpu-miner-dashboard",
   "version": "1.0.0",
-  "description": "QuaiMiner CORE OS - Custom mining OS with real-time dashboard for operating a DePool on Quai Network",
+  "description": "Quai GPU Miner - Simple web interface for Quai Network mining with automatic GPU detection and driver installation",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,21 +15,17 @@
     "docker:logs": "docker-compose logs -f"
   },
   "keywords": [
-    "quaiminer-core-os",
-    "quaiminer",
-    "mining",
-    "dashboard",
+    "quai-gpu-miner",
     "quai",
     "quai-network",
+    "mining",
+    "gpu-mining",
     "cryptocurrency",
-    "monitoring",
-    "blockchain",
-    "depool",
-    "decentralized-pool",
-    "mining-pool",
-    "pool-operator",
-    "amd-gpu",
-    "progpow"
+    "progpow",
+    "nvidia",
+    "amd",
+    "miner",
+    "dashboard"
   ],
   "author": "thecrackofdan",
   "license": "MIT",
@@ -45,7 +41,10 @@
     "compression": "^1.7.4",
     "chart.js": "^4.4.0",
     "pdfkit": "^0.14.0",
-    "csv-writer": "^1.6.0"
+    "csv-writer": "^1.6.0",
+    "nodemailer": "^6.9.7",
+    "node-telegram-bot-api": "^0.64.0",
+    "axios": "^1.6.2"
   },
   "devDependencies": {},
   "engines": {
@@ -53,9 +52,7 @@
     "npm": ">=6.0.0"
   },
   "os": [
-    "win32",
-    "linux",
-    "darwin"
+    "linux"
   ],
   "cpu": [
     "x64",
@@ -63,11 +60,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/thecrackofdan/quaiminer-core-os.git",
+    "url": "https://github.com/thecrackofdan/quai-gpu-miner.git",
     "directory": "miner-dashboard"
   },
   "bugs": {
-    "url": "https://github.com/thecrackofdan/quaiminer-core-os/issues"
+    "url": "https://github.com/thecrackofdan/quai-gpu-miner/issues"
   },
-  "homepage": "https://github.com/thecrackofdan/quaiminer-core-os#readme"
+  "homepage": "https://github.com/thecrackofdan/quai-gpu-miner#readme"
 }

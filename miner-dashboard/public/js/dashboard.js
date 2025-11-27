@@ -4003,6 +4003,18 @@ class MiningDashboard {
             this.oneClickMining = new OneClickMining(this);
         }
 
+        // Initialize Alert Manager
+        if (typeof AlertManager !== 'undefined') {
+            this.alertManager = new AlertManager(this);
+            window.alertManager = this.alertManager;
+        }
+
+        // Initialize Auto Chain Switcher
+        if (typeof AutoChainSwitcherUI !== 'undefined') {
+            this.autoChainSwitcher = new AutoChainSwitcherUI(this);
+            window.autoChainSwitcher = this.autoChainSwitcher;
+        }
+
         // Initialize Mining Insights
         if (typeof MiningInsights !== 'undefined') {
             this.miningInsights = new MiningInsights(this);
@@ -4524,6 +4536,20 @@ class MiningDashboard {
             console.error('Error fetching historical data:', error);
             return [];
         }
+    }
+
+    /**
+     * Get authentication token
+     */
+    getAuthToken() {
+        return localStorage.getItem('authToken') || null;
+    }
+
+    /**
+     * Get API key
+     */
+    getApiKey() {
+        return localStorage.getItem('apiKey') || null;
     }
 }
 
