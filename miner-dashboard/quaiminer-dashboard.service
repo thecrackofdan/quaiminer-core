@@ -1,6 +1,6 @@
 [Unit]
 Description=Quai Miner Dashboard - Web interface for Quai Network mining
-Documentation=https://github.com/thecrackofdan/quai-gpu-miner
+Documentation=https://github.com/thecrackofdan/Quai-GPU-Miner
 After=network.target
 
 [Service]

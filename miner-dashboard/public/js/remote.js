@@ -13,7 +13,7 @@ const installationInstructions = {
             <p class="info-note">The ISO will be created in <code>output/quai-gpu-miner.iso</code></p>
             
             <p><strong>Or download from GitHub releases (when available):</strong></p>
-            <code>wget https://github.com/thecrackofdan/quai-gpu-miner/releases/latest/download/quai-gpu-miner.iso</code>
+            <code>wget https://github.com/thecrackofdan/Quai-GPU-Miner/releases/latest/download/quai-gpu-miner.iso</code>
             
             <h3>Step 2: Verify the Download</h3>
             <p>Verify the SHA256 checksum:</p>

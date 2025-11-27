@@ -225,7 +225,7 @@ MIT
 
 ## Related Projects
 
-- [Quai GPU Miner](https://github.com/thecrackofdan/quai-gpu-miner) - Complete mining toolkit with setup scripts, research, and AMD GPU configuration tools
+- [Quai GPU Miner](https://github.com/thecrackofdan/Quai-GPU-Miner) - Complete mining toolkit with setup scripts, research, and AMD GPU configuration tools
 
 ## Support
 

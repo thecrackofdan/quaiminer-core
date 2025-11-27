@@ -53,7 +53,7 @@ npm --version
 
 ```bash
 # Option A: Clone from repository
-git clone https://github.com/thecrackofdan/quai-gpu-miner.git
+git clone https://github.com/thecrackofdan/Quai-GPU-Miner.git
 cd quai-gpu-miner/miner-dashboard
 
 # Option B: Copy files to production location

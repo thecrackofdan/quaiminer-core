@@ -38,7 +38,7 @@ sudo apt-get install -y nodejs
 
 ### Step 2: Get the Code
 ```bash
-git clone https://github.com/thecrackofdan/quai-gpu-miner.git
+git clone https://github.com/thecrackofdan/Quai-GPU-Miner.git
 cd quai-gpu-miner/miner-dashboard
 ```
 

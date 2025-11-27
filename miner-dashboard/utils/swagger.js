@@ -12,7 +12,7 @@ const options = {
             description: 'API documentation for Quai Network mining dashboard',
             contact: {
                 name: 'API Support',
-                url: 'https://github.com/thecrackofdan/quai-gpu-miner'
+                url: 'https://github.com/thecrackofdan/Quai-GPU-Miner'
             },
             license: {
                 name: 'MIT',
