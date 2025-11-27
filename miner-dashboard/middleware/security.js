@@ -1,6 +1,6 @@
 /**
  * Security Middleware
- * Additional security measures for QuaiMiner CORE OS
+ * Additional security measures for Quai GPU Miner
  */
 
 /**

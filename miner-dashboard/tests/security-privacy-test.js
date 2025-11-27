@@ -1,5 +1,5 @@
 /**
- * Security and Privacy Tests for QuaiMiner CORE OS
+ * Security and Privacy Tests for Quai GPU Miner
  * Tests security measures, privacy protection, and open source compliance
  */
 

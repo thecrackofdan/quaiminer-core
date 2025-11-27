@@ -1,5 +1,5 @@
 /**
- * Functionality Tests for QuaiMiner CORE OS Dashboard
+ * Functionality Tests for Quai GPU Miner Dashboard
  * Tests all major features and functionality
  */
 
